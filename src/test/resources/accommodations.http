@@ -1,0 +1,46 @@
+### Obtener todos los alojamientos
+GET http://localhost:8080/api/accommodations
+
+### Obtener alojamientos filtrados por ciudad
+GET http://localhost:8080/api/accommodations?city=Bogota
+
+### Obtener alojamientos con filtro de precio
+GET http://localhost:8080/api/accommodations?minPrice=50&maxPrice=200
+
+### Obtener un alojamiento por id
+GET http://localhost:8080/api/accommodations/1
+
+### Crear un alojamiento
+POST http://localhost:8080/api/accommodations
+Content-Type: application/json
+
+{
+  "title": "Casa en Bogotá",
+  "description": "Hermosa casa con vista a la ciudad",
+  "city": "Bogota",
+  "address": "Calle 50 #10-20",
+  "latitude": 4.7110,
+  "longitude": -74.0721,
+  "pricePerNight": 150.00,
+  "maxCapacity": 4,
+  "amenities": "WiFi, Cocina, Piscina"
+}
+
+### Actualizar un alojamiento
+PUT http://localhost:8080/api/accommodations/1
+Content-Type: application/json
+
+{
+  "title": "Casa moderna en Bogotá",
+  "description": "Hermosa casa con vista a la ciudad, totalmente renovada",
+  "city": "Bogota",
+  "address": "Calle 50 #10-20",
+  "latitude": 4.7110,
+  "longitude": -74.0721,
+  "pricePerNight": 180.00,
+  "maxCapacity": 6,
+  "amenities": "WiFi, Cocina, Piscina, Jacuzzi"
+}
+
+### Eliminar un alojamiento
+DELETE http://localhost:8080/api/accommodations/1
