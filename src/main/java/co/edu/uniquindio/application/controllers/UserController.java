@@ -2,12 +2,14 @@ package co.edu.uniquindio.application.controllers;
 
 import co.edu.uniquindio.application.dto.CreateUserDTO;
 import co.edu.uniquindio.application.dto.EditUserDTO;
+import co.edu.uniquindio.application.dto.ResponseDTO;
 import co.edu.uniquindio.application.dto.UserDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -20,26 +22,32 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDTO<>(false, "El registro ha sido exitoso"));
     }
 
-    @PutMapping("/{id}") // Debe coincidir con el nombre del parámetro (id)
-    public void edit(@PathVariable String id, @Valid @RequestBody EditUserDTO userDTO) throws Exception{
-
+    @PutMapping("/{id}")
+    public ResponseEntity<ResponseDTO<String>> edit(@PathVariable String id, @Valid @RequestBody EditUserDTO userDTO) throws Exception{
+        //Lógica para editar el usuario
+        return ResponseEntity.ok(new ResponseDTO<>(false, "El usuario ha sido actualizado"));
     }
 
-    @DeleteMapping("/{id}") // Debe coincidir con el nombre del parámetro (id)
-    public void delete(@PathVariable String id) throws Exception{
-
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ResponseDTO<String>> delete(@PathVariable String id) throws Exception{
+        //Lógica para eliminar el usuario
+        return ResponseEntity.ok(new ResponseDTO<>(false, "El usuario ha sido eliminado"));
     }
 
-    @GetMapping("/{id}") // Debe coincidir con el nombre del parámetro (id)
-    public UserDTO get(@PathVariable String id) throws Exception{
-        return null;
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseDTO<UserDTO>> get(@PathVariable String id) throws Exception{
+        //Lógica para consultar el usuario
+        return ResponseEntity.ok(new ResponseDTO<>(false, null));
     }
 
     @GetMapping
-    public List<UserDTO> listAll(){
-        return null;
+    public ResponseEntity<ResponseDTO<List<UserDTO>>> listAll(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String phone
+    ) {
+        //Lógica para consultar todos los usuarios con filtros
+        List<UserDTO> list = new ArrayList<>();
+        return ResponseEntity.ok(new ResponseDTO<>(false, list));
     }
-
-
 
 }
