@@ -22,7 +22,7 @@ Content-Type: application/json
   "latitude": 4.7110,
   "longitude": -74.0721,
   "pricePerNight": 150.00,
-  "maxCapacity": 4,
+  "maxCapacity": 5,
   "amenities": "WiFi, Cocina, Piscina"
 }
 
@@ -38,7 +38,7 @@ Content-Type: application/json
   "latitude": 4.7110,
   "longitude": -74.0721,
   "pricePerNight": 180.00,
-  "maxCapacity": 6,
+  "maxCapacity": 8,
   "amenities": "WiFi, Cocina, Piscina, Jacuzzi"
 }
 
