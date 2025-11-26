@@ -2,6 +2,7 @@ package co.edu.uniquindio.application.exceptions;
 
 import co.edu.uniquindio.application.dto.ResponseDTO;
 import co.edu.uniquindio.application.dto.ValidationDTO;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -35,4 +36,10 @@ public class RestExceptionHandler {
         }
         return ResponseEntity.badRequest().body( new ResponseDTO<>(true, errors) );
     }
+
+    @ExceptionHandler(ValueConflictException.class)
+    public ResponseEntity<ResponseDTO<String>> handleValueConflictException(ValueConflictException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body( new ResponseDTO<>(true, ex.getMessage()) );
+    }
+
 }
