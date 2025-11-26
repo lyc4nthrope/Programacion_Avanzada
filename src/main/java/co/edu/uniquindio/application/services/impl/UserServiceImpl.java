@@ -3,6 +3,7 @@ package co.edu.uniquindio.application.services.impl;
 import co.edu.uniquindio.application.dto.CreateUserDTO;
 import co.edu.uniquindio.application.dto.EditUserDTO;
 import co.edu.uniquindio.application.dto.UserDTO;
+import co.edu.uniquindio.application.exceptions.NotFoundException;
 import co.edu.uniquindio.application.exceptions.ValueConflictException;
 import co.edu.uniquindio.application.mappers.UserMapper;
 import co.edu.uniquindio.application.model.User;
@@ -45,7 +46,7 @@ public class UserServiceImpl implements UserService {
 
         // Si el usuario no existe, lanzar una excepción
         if (user == null) {
-            throw new Exception("Usuario no encontrado.");
+            throw new NotFoundException("El usuario con ID '" + id + "' no fue encontrado.");
         }
 
         // Transformación del usuario a DTO
@@ -59,7 +60,7 @@ public class UserServiceImpl implements UserService {
 
         // Si el usuario no existe, lanzar una excepción
         if (user == null) {
-            throw new Exception("Usuario no encontrado.");
+            throw new NotFoundException("El usuario con ID '" + id + "' no fue encontrado.");
         }
 
         // Eliminación del usuario
@@ -82,7 +83,7 @@ public class UserServiceImpl implements UserService {
 
         // Si el usuario no existe, lanzar una excepción
         if (user == null) {
-            throw new Exception("Usuario no encontrado.");
+            throw new NotFoundException("El usuario con ID '" + id + "' no fue encontrado.");
         }
 
         // Actualización de los campos del usuario

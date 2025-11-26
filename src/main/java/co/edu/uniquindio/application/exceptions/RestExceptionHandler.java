@@ -19,27 +19,36 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ResponseDTO<String>> noResourceFoundExceptionHandler(NoResourceFoundException ex){
-        return ResponseEntity.status(404).body( new ResponseDTO<>(true, "El recurso solicitado no existe") );
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ResponseDTO<String>> generalExceptionHandler (Exception e){
-        return ResponseEntity.internalServerError().body( new ResponseDTO<>(true, e.getMessage()) );
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ResponseDTO<List<ValidationDTO>>> validationExceptionHandler ( MethodArgumentNotValidException ex ) {
-        List<ValidationDTO> errors = new ArrayList<>();
-        BindingResult results = ex.getBindingResult();
-        for (FieldError e: results.getFieldErrors()) {
-            errors.add( new ValidationDTO(e.getField(), e.getDefaultMessage()) );
-        }
-        return ResponseEntity.badRequest().body( new ResponseDTO<>(true, errors) );
+        return ResponseEntity.status(404).body(new ResponseDTO<>(true, "El recurso solicitado no existe"));
     }
 
     @ExceptionHandler(ValueConflictException.class)
     public ResponseEntity<ResponseDTO<String>> handleValueConflictException(ValueConflictException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body( new ResponseDTO<>(true, ex.getMessage()) );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseDTO<>(true, ex.getMessage()));
     }
 
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ResponseDTO<String>> handleNotFoundException(NotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseDTO<>(true, ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidOperationException.class)
+    public ResponseEntity<ResponseDTO<String>> handleInvalidOperationException(InvalidOperationException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO<>(true, ex.getMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ResponseDTO<List<ValidationDTO>>> validationExceptionHandler(MethodArgumentNotValidException ex) {
+        List<ValidationDTO> errors = new ArrayList<>();
+        BindingResult results = ex.getBindingResult();
+        for (FieldError e: results.getFieldErrors()) {
+            errors.add(new ValidationDTO(e.getField(), e.getDefaultMessage()));
+        }
+        return ResponseEntity.badRequest().body(new ResponseDTO<>(true, errors));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ResponseDTO<String>> generalExceptionHandler(Exception e){
+        return ResponseEntity.internalServerError().body(new ResponseDTO<>(true, e.getMessage()));
+    }
 }
