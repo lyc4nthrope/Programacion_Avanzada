@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/greeting") // Prefijo común para todas las rutas del controlador
+@RequestMapping("/api/greeting") // Prefijo común para todas las rutas del controlador
 public class GreetingController {
 
     @GetMapping

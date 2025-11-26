@@ -40,14 +40,16 @@ dependencies {
     // Spring Security (para BCrypt)
     implementation 'org.springframework.security:spring-security-crypto'
 
-    // Testing
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    // Correos  linreria Simple Java Mail
+    // Email - Simple Java Mail
     implementation 'org.simplejavamail:simple-java-mail:8.12.6'
     implementation 'org.simplejavamail:batch-module:8.12.6'
 
+    // Cloudinary - Image Management
+    implementation 'com.cloudinary:cloudinary-http5:2.3.2'
+
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {

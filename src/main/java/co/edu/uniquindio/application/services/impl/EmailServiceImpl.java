@@ -7,31 +7,48 @@ import org.simplejavamail.api.mailer.Mailer;
 import org.simplejavamail.api.mailer.config.TransportStrategy;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.MailerBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import static org.simplejavamail.config.ConfigLoader.Property.SMTP_PORT;
 
 @Service
 public class EmailServiceImpl implements EmailService {
 
+    @Value("smtp.gmail.com")
+    private String smtpHost;
+
+    @Value("587")
+    private int smtpPort;
+
+    @Value("pruebasprograavanzada@gmail.com")
+    private String smtpUsername;
+
+    @Value("sdrm cclw xjrn hvmh")
+    private String smtpPassword;
+
     @Override
     @Async
     public void sendMail(EmailDTO emailDTO) throws Exception {
-        Email email = EmailBuilder.startingBlank()
-                .from("SMTP_USERNAME")
-                .to(emailDTO.recipient())
-                .withSubject(emailDTO.subject())
-                .withPlainText(emailDTO.body())
-                .buildEmail();
+        try {
+            Email email = EmailBuilder.startingBlank()
+                    .from(smtpUsername)
+                    .to(emailDTO.recipient())
+                    .withSubject(emailDTO.subject())
+                    .withPlainText(emailDTO.body())
+                    .buildEmail();
 
-        try (Mailer mailer = MailerBuilder
-                .withSMTPServer("smtp.gmail.com", 587, "pruebasprograavanzada@gmail.com", "sdrm cclw xjrn hvmh")
-                .withTransportStrategy(TransportStrategy.SMTP_TLS)
-                .withDebugLogging(true)
-                .buildMailer()) {
+            try (Mailer mailer = MailerBuilder
+                    .withSMTPServer(smtpHost, smtpPort, smtpUsername, smtpPassword)
+                    .withTransportStrategy(TransportStrategy.SMTP_TLS)
+                    .withDebugLogging(true)
+                    .buildMailer()) {
 
-            mailer.sendMail(email);
+                mailer.sendMail(email);
+                System.out.println("✅ Email enviado exitosamente a: " + emailDTO.recipient());
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Error al enviar email: " + e.getMessage());
+            throw e;
         }
     }
 }
