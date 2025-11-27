@@ -1,53 +1,33 @@
 package co.edu.uniquindio.application.models.entitys;
 
-import co.edu.uniquindio.application.models.vo.Answer;
+import co.edu.uniquindio.application.models.entitys.User;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "review", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"reservation_id"})
-})
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Getter @Setter
-@Builder @AllArgsConstructor @NoArgsConstructor
+@Entity
 public class Review {
-    @Id private String id;
 
-    @Column(nullable = false)
-    private Float rating; // 1-5 estrellas
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Genera el id automáticamente en la base de datos
+    private Long id;
 
-    @Column(length = 2000)
-    private String comment;
-
-    @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime createdAt;
-
-    @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-    private LocalDateTime updatedAt;
-
-    @Embedded private Answer answer;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne //Llave foránea a la entidad User
+    @JoinColumn(nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "accommodation_id", nullable = false)
-    private Accommodation accommodation;
+    @Lob // Sirve para textos largos
+    @Column(nullable = false)
+    private String comment;
 
-    @OneToOne
-    @JoinColumn(name = "reservation_id")
-    private Reservation reservation;
+    @Column(nullable = false)
+    private int rating;
 
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) createdAt = LocalDateTime.now();
-        if (updatedAt == null) updatedAt = LocalDateTime.now();
-    }
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 }
