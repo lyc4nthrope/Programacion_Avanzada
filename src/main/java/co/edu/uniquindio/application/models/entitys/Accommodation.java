@@ -1,6 +1,6 @@
 package co.edu.uniquindio.application.models.entitys;
 
-import co.edu.uniquindio.application.models.enums.Status;
+import co.edu.uniquindio.application.models.enums.UserStatus;
 import co.edu.uniquindio.application.models.enums.Service;
 import co.edu.uniquindio.application.models.enums.UserStatus;
 import co.edu.uniquindio.application.models.vo.Address;
