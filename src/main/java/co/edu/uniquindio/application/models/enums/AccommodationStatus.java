@@ -1,4 +1,4 @@
-package co.edu.uniquindio.application.model;
+package co.edu.uniquindio.application.models.enums;
 
 public enum AccommodationStatus {
     ACTIVE,

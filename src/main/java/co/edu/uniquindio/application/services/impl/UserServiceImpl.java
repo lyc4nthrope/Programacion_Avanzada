@@ -6,7 +6,7 @@ import co.edu.uniquindio.application.dto.UserDTO;
 import co.edu.uniquindio.application.exceptions.NotFoundException;
 import co.edu.uniquindio.application.exceptions.ValueConflictException;
 import co.edu.uniquindio.application.mappers.UserMapper;
-import co.edu.uniquindio.application.model.User;
+import co.edu.uniquindio.application.models.entitys.User;
 import co.edu.uniquindio.application.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

@@ -1,6 +1,6 @@
 package co.edu.uniquindio.application.dto;
 
-import co.edu.uniquindio.application.model.Role;
+import co.edu.uniquindio.application.models.enums.Role;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;

@@ -21,7 +21,7 @@ public class EmailServiceImpl implements EmailService {
     private int smtpPort;
 
     @Value("pruebasprograavanzada@gmail.com")
-    private String smtpUsername;
+    private String smtpUsername;x
 
     @Value("sdrm cclw xjrn hvmh")
     private String smtpPassword;
