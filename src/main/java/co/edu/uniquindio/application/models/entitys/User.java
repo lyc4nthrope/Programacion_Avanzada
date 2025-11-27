@@ -37,7 +37,7 @@ public class User {
     private String photo; // URL en Cloudinary
 
     @Column(nullable = false)
-    private LocalDate birthDate;
+    private LocalDate dateBirth;
 
     // Roles y estado
     @Enumerated(EnumType.STRING)

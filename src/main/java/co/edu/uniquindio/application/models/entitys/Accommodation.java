@@ -31,7 +31,6 @@ public class Accommodation {
     private String description;
 
     @Embedded
-    @Column(nullable = false)
     private Address address;
 
     @Column(nullable = false)
