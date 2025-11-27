@@ -1,30 +1,26 @@
 package co.edu.uniquindio.application.models.entitys;
 
-import co.edu.uniquindio.application.models.enums.Rol;
-import co.edu.uniquindio.application.models.enums.Estado;
 import co.edu.uniquindio.application.models.enums.Role;
+import co.edu.uniquindio.application.models.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Getter
-@Setter
 @Entity
-@Table(name = "usuario", indexes = {
+@Table(name = "user", indexes = {
         @Index(name = "idx_email", columnList = "email", unique = true),
-        @Index(name = "idx_rol", columnList = "rol"),
-        @Index(name = "idx_estado", columnList = "estado")
+        @Index(name = "idx_role", columnList = "role"),
+        @Index(name = "idx_status", columnList = "status")
 })
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter @Setter
+@Builder @AllArgsConstructor @NoArgsConstructor
 public class User {
+    // Identificador único
+    @Id private String id;
 
-    @Id
-    private String id;  // UUID
-
+    // Información básica
     @Column(nullable = false, length = 100)
     private String name;
 
@@ -32,25 +28,27 @@ public class User {
     private String email;
 
     @Column(nullable = false, length = 150)
-    private String password;  // Encriptada con BCrypt
+    private String password; // Encriptada
 
     @Column(nullable = false, length = 15)
     private String phone;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
+    @Column(length = 300)
+    private String photo; // URL en Cloudinary
 
     @Column(nullable = false)
     private LocalDate birthDate;
 
-    @Column(length = 300)
-    private String photo;  // URL en Cloudinary
+    // Roles y estado
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Estado status;
+    private UserStatus status;
 
+    // Auditoría
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
 
@@ -58,8 +56,8 @@ public class User {
     private LocalDateTime updatedAt;
 
     // Relaciones
-    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
-    private PerfilAnfitrion hostProfile;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private HostProfile hostProfile;
 
     @OneToMany(mappedBy = "host")
     private List<Accommodation> accommodations;
@@ -67,13 +65,13 @@ public class User {
     @OneToMany(mappedBy = "guest")
     private List<Reservation> reservations;
 
-    @OneToMany(mappedBy = "usuario")
+    @OneToMany(mappedBy = "user")
     private List<Review> reviews;
 
-    @OneToMany(mappedBy = "usuario")
+    @OneToMany(mappedBy = "user")
     private List<PasswordResetCode> resetCodes;
 
-    @ManyToMany(mappedBy = "usuarios")
+    @ManyToMany(mappedBy = "users")
     private List<Chat> chats;
 
     @OneToMany(mappedBy = "sender")
@@ -82,20 +80,14 @@ public class User {
     @OneToMany(mappedBy = "recipient")
     private List<Message> receivedMessages;
 
-    @OneToMany(mappedBy = "usuario")
+    @OneToMany(mappedBy = "user")
     private List<Favorite> favorites;
 
     @PrePersist
     protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-        if (updatedAt == null) {
-            updatedAt = LocalDateTime.now();
-        }
-        if (status == null) {
-            status = Estado.ACTIVE;
-        }
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        if (updatedAt == null) updatedAt = LocalDateTime.now();
+        if (status == null) status = status.ACTIVE;
     }
 
     @PreUpdate

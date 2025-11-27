@@ -1,8 +1,8 @@
 package co.edu.uniquindio.application.models.enums;
 
 public enum ReservationStatus {
-    PENDING,    // Pendiente de confirmación
+    PENDING,    // Pendiente
     CONFIRMED,  // Confirmada
     CANCELLED,  // Cancelada
-    COMPLETED   // Completada (check-out realizado)
+    COMPLETED   // Completada
 }

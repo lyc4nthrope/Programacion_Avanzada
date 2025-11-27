@@ -1,80 +1,68 @@
 package co.edu.uniquindio.application.models.entitys;
 
-import co.edu.uniquindio.application.models.enums.ReservaEstado;
+import co.edu.uniquindio.application.models.enums.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
 @Entity
-@Table(name = "reserva", indexes = {
-        @Index(name = "idx_huesped", columnList = "huesped_id"),
-        @Index(name = "idx_alojamiento", columnList = "alojamiento_id"),
-        @Index(name = "idx_fechas", columnList = "fecha_entrada, fecha_salida"),
-        @Index(name = "idx_estado", columnList = "estado")
+@Table(name = "reservation", indexes = {
+        @Index(name = "idx_guest", columnList = "guest_id"),
+        @Index(name = "idx_accommodation", columnList = "accommodation_id"),
+        @Index(name = "idx_dates", columnList = "check_in_date, check_out_date"),
+        @Index(name = "idx_status", columnList = "status")
 })
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter @Setter
+@Builder @AllArgsConstructor @NoArgsConstructor
 public class Reservation {
-
-    @Id
-    private String id;  // UUID
+    @Id private String id;
 
     @Column(nullable = false)
-    private LocalDate fechaEntrada;
+    private LocalDate checkInDate;
 
     @Column(nullable = false)
-    private LocalDate fechaSalida;
+    private LocalDate checkOutDate;
 
     @Column(nullable = false)
-    private Integer cantidadHuespedes;
+    private Integer numberOfGuests;
 
     @Column(nullable = false)
-    private Double precioTotal;
+    private Double totalPrice;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ReservaEstado estado;
+    private ReservationStatus status;
 
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime creadoEn;
+    private LocalDateTime createdAt;
 
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-    private LocalDateTime actualizadoEn;
-
-    // Relaciones
-    @ManyToOne
-    @JoinColumn(name = "alojamiento_id", nullable = false)
-    private Alojamiento alojamiento;
+    private LocalDateTime updatedAt;
 
     @ManyToOne
-    @JoinColumn(name = "huesped_id", nullable = false)
-    private Usuario huesped;
+    @JoinColumn(name = "accommodation_id", nullable = false)
+    private Accommodation accommodation;
 
-    @OneToOne(mappedBy = "reserva", cascade = CascadeType.ALL)
-    private Pago pago;
+    @ManyToOne
+    @JoinColumn(name = "guest_id", nullable = false)
+    private User guest;
 
-    @OneToOne(mappedBy = "reserva")
-    private Resena resena;
+    @OneToOne(mappedBy = "reservation", cascade = CascadeType.ALL)
+    private Payment payment;
+
+    @OneToOne(mappedBy = "reservation")
+    private Review review;
 
     @PrePersist
     protected void onCreate() {
-        if (creadoEn == null) {
-            creadoEn = LocalDateTime.now();
-        }
-        if (actualizadoEn == null) {
-            actualizadoEn = LocalDateTime.now();
-        }
-        if (estado == null) {
-            estado = ReservaEstado.PENDING;
-        }
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        if (updatedAt == null) updatedAt = LocalDateTime.now();
+        if (status == null) status = ReservationStatus.PENDING;
     }
 
     @PreUpdate
     protected void onUpdate() {
-        actualizadoEn = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 }

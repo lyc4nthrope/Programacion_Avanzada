@@ -4,51 +4,41 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
 @Entity
-@Table(name = "mensaje", indexes = {
+@Table(name = "message", indexes = {
         @Index(name = "idx_chat", columnList = "chat_id"),
-        @Index(name = "idx_remitente", columnList = "remitente_id"),
-        @Index(name = "idx_leido", columnList = "leido")
+        @Index(name = "idx_sender", columnList = "sender_id"),
+        @Index(name = "idx_read", columnList = "is_read")
 })
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter @Setter
+@Builder @AllArgsConstructor @NoArgsConstructor
 public class Message {
-
-    @Id
-    private String id;  // UUID
+    @Id private String id;
 
     @Column(nullable = false, length = 1000)
-    private String contenido;
+    private String content;
 
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime fechaEnvio;
+    private LocalDateTime sentAt;
 
     @Column(nullable = false)
-    private Boolean leido;
+    private Boolean isRead;
 
-    // Relaciones
     @ManyToOne
     @JoinColumn(name = "chat_id", nullable = false)
     private Chat chat;
 
     @ManyToOne
-    @JoinColumn(name = "remitente_id", nullable = false)
-    private Usuario remitente;
+    @JoinColumn(name = "sender_id", nullable = false)
+    private User sender;
 
     @ManyToOne
-    @JoinColumn(name = "destinatario_id", nullable = false)
-    private Usuario destinatario;
+    @JoinColumn(name = "recipient_id", nullable = false)
+    private User recipient;
 
     @PrePersist
     protected void onCreate() {
-        if (fechaEnvio == null) {
-            fechaEnvio = LocalDateTime.now();
-        }
-        if (leido == null) {
-            leido = false;
-        }
+        if (sentAt == null) sentAt = LocalDateTime.now();
+        if (isRead == null) isRead = false;
     }
 }

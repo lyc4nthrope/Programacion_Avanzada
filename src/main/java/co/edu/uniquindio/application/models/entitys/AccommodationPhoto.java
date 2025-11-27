@@ -4,42 +4,32 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
 @Entity
-@Table(name = "foto_alojamiento")
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Table(name = "accommodation_photo")
+@Getter @Setter
+@Builder @AllArgsConstructor @NoArgsConstructor
 public class AccommodationPhoto {
-
-    @Id
-    private String id;  // UUID
+    @Id private String id;
 
     @Column(nullable = false)
-    private String urlImagen;
+    private String imageUrl;
 
     @Column(nullable = false)
-    private Boolean esPrincipal;
+    private Boolean isPrimary;
 
     @Column(nullable = false)
-    private Integer orden;
+    private Integer displayOrder;
 
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime creadoEn;
+    private LocalDateTime createdAt;
 
-    // Relación
     @ManyToOne
-    @JoinColumn(name = "alojamiento_id", nullable = false)
-    private Alojamiento alojamiento;
+    @JoinColumn(name = "accommodation_id", nullable = false)
+    private Accommodation accommodation;
 
     @PrePersist
     protected void onCreate() {
-        if (creadoEn == null) {
-            creadoEn = LocalDateTime.now();
-        }
-        if (esPrincipal == null) {
-            esPrincipal = false;
-        }
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        if (isPrimary == null) isPrimary = false;
     }
 }

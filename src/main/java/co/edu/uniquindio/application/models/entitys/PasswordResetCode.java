@@ -4,49 +4,37 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
 @Entity
-@Table(name = "contrasena_codigo_reinicio", indexes = {
-        @Index(name = "idx_usuario", columnList = "usuario_id"),
-        @Index(name = "idx_codigo", columnList = "codigo"),
-        @Index(name = "idx_expira", columnList = "expira_en")
+@Table(name = "password_reset_code", indexes = {
+        @Index(name = "idx_user", columnList = "user_id"),
+        @Index(name = "idx_code", columnList = "code"),
+        @Index(name = "idx_expires", columnList = "expires_at")
 })
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter @Setter
+@Builder @AllArgsConstructor @NoArgsConstructor
 public class PasswordResetCode {
-
-    @Id
-    private String id;  // UUID
+    @Id private String id;
 
     @Column(nullable = false, unique = true)
-    private String codigo;
+    private String code;
 
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime creadoEn;
+    private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private LocalDateTime expiraEn;
+    private LocalDateTime expiresAt;
 
     @Column(nullable = false)
-    private Boolean utilizado;
+    private Boolean used;
 
-    // Relación
     @ManyToOne
-    @JoinColumn(name = "usuario_id", nullable = false)
-    private Usuario usuario;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @PrePersist
     protected void onCreate() {
-        if (creadoEn == null) {
-            creadoEn = LocalDateTime.now();
-        }
-        if (expiraEn == null) {
-            expiraEn = LocalDateTime.now().plusMinutes(15); // Válido 15 minutos
-        }
-        if (utilizado == null) {
-            utilizado = false;
-        }
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        if (expiresAt == null) expiresAt = LocalDateTime.now().plusMinutes(15);
+        if (used == null) used = false;
     }
 }

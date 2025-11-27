@@ -5,43 +5,33 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "chat")
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter @Setter
+@Builder @AllArgsConstructor @NoArgsConstructor
 public class Chat {
-
-    @Id
-    private String id;  // UUID
+    @Id private String id;
 
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime creadoEn;
+    private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private Boolean activo;
+    private Boolean active;
 
-    // Relaciones
     @ManyToMany
     @JoinTable(
-            name = "chat_usuarios",
+            name = "chat_users",
             joinColumns = @JoinColumn(name = "chat_id"),
-            inverseJoinColumns = @JoinColumn(name = "usuario_id")
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private List<Usuario> usuarios;
+    private List<User> users;
 
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL)
-    private List<Mensaje> mensajes;
+    private List<Message> messages;
 
     @PrePersist
     protected void onCreate() {
-        if (creadoEn == null) {
-            creadoEn = LocalDateTime.now();
-        }
-        if (activo == null) {
-            activo = true;
-        }
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        if (active == null) active = true;
     }
 }

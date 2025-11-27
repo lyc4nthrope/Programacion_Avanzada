@@ -4,36 +4,28 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "favorite", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"usuario_id", "alojamiento_id"})
+        @UniqueConstraint(columnNames = {"user_id", "accommodation_id"})
 })
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter @Setter
+@Builder @AllArgsConstructor @NoArgsConstructor
 public class Favorite {
-
-    @Id
-    private String id;  // UUID
+    @Id private String id;
 
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime creadoEn;
-
-    // Relaciones
-    @ManyToOne
-    @JoinColumn(name = "usuario_id", nullable = false)
-    private Usuario usuario;
+    private LocalDateTime createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "alojamiento_id", nullable = false)
-    private Alojamiento alojamiento;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "accommodation_id", nullable = false)
+    private Accommodation accommodation;
 
     @PrePersist
     protected void onCreate() {
-        if (creadoEn == null) {
-            creadoEn = LocalDateTime.now();
-        }
+        if (createdAt == null) createdAt = LocalDateTime.now();
     }
 }

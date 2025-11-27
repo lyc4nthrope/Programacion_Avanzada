@@ -1,9 +1,5 @@
 package co.edu.uniquindio.application.models.enums;
 
 public enum PaymentMethod {
-    TARJETA_CREDITO,
-    TARJETA_DEBITO,
-    TRANSFERENCIA,
-    EFECTIVO,
-    PAYPAL
+    CREDIT_CARD, DEBIT_CARD, TRANSFER, CASH, PAYPAL
 }

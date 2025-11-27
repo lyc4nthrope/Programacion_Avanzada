@@ -5,44 +5,33 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "availability_calendar", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"alojamiento_id", "fecha"})
+        @UniqueConstraint(columnNames = {"accommodation_id", "date"})
 })
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter @Setter
+@Builder @AllArgsConstructor @NoArgsConstructor
 public class AvailabilityCalendar {
-
-    @Id
-    private String id;  // UUID
+    @Id private String id;
 
     @Column(nullable = false)
-    private LocalDate fecha;
+    private LocalDate date;
 
     @Column(nullable = false)
-    private Boolean disponible;
+    private Boolean available;
 
-    @Column
-    private String razon;
+    @Column private String reason;
 
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime creadoEn;
+    private LocalDateTime createdAt;
 
-    // Relación
     @ManyToOne
-    @JoinColumn(name = "alojamiento_id", nullable = false)
-    private Alojamiento alojamiento;
+    @JoinColumn(name = "accommodation_id", nullable = false)
+    private Accommodation accommodation;
 
     @PrePersist
     protected void onCreate() {
-        if (creadoEn == null) {
-            creadoEn = LocalDateTime.now();
-        }
-        if (disponible == null) {
-            disponible = true;
-        }
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        if (available == null) available = true;
     }
 }
