@@ -1,0 +1,46 @@
+### Obtener todas las reservas
+GET http://localhost:8080/api/reservations
+
+### Obtener una reserva por ID
+GET http://localhost:8080/api/reservations/res-123
+
+### Crear una reserva
+POST http://localhost:8080/api/reservations
+Content-Type: application/json
+
+{
+  "accommodationId": "acc-123",
+  "guestId": "user-456",
+  "checkInDate": "2025-12-20",
+  "checkOutDate": "2025-12-25",
+  "numberOfGuests": 2
+}
+
+### Listar reservas por alojamiento
+GET http://localhost:8080/api/reservations/accommodation/acc-123
+
+### Listar reservas por huésped
+GET http://localhost:8080/api/reservations/guest/user-456
+
+### Listar reservas por estado
+GET http://localhost:8080/api/reservations/status/PENDING
+
+### Verificar disponibilidad
+GET http://localhost:8080/api/reservations/availability?accommodationId=acc-123&checkInDate=2025-12-20&checkOutDate=2025-12-25
+
+### Editar una reserva
+PUT http://localhost:8080/api/reservations/res-123
+Content-Type: application/json
+
+{
+  "checkInDate": "2025-12-21",
+  "checkOutDate": "2025-12-26",
+  "numberOfGuests": 3,
+  "status": "PENDING"
+}
+
+### Confirmar una reserva
+PUT http://localhost:8080/api/reservations/res-123/confirm
+
+### Cancelar una reserva
+PUT http://localhost:8080/api/reservations/res-123/cancel

@@ -1,8 +1,8 @@
 package co.edu.uniquindio.application.services;
 
 import co.edu.uniquindio.application.dto.AccommodationDTO;
-import co.edu.uniquindio.application.dto.CreateAccommodationDTO;
-import co.edu.uniquindio.application.dto.EditAccommodationDTO;
+import co.edu.uniquindio.application.dto.create.CreateAccommodationDTO;
+import co.edu.uniquindio.application.dto.edit.EditAccommodationDTO;
 import java.util.List;
 
 public interface AccommodationService {

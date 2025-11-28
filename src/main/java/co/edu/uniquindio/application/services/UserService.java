@@ -1,7 +1,7 @@
 package co.edu.uniquindio.application.services;
 
-import co.edu.uniquindio.application.dto.CreateUserDTO;
-import co.edu.uniquindio.application.dto.EditUserDTO;
+import co.edu.uniquindio.application.dto.create.CreateUserDTO;
+import co.edu.uniquindio.application.dto.edit.EditUserDTO;
 import co.edu.uniquindio.application.dto.UserDTO;
 import java.util.List;
 

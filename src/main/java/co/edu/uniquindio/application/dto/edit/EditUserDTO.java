@@ -1,4 +1,4 @@
-package co.edu.uniquindio.application.dto;
+package co.edu.uniquindio.application.dto.edit;
 
 import co.edu.uniquindio.application.models.enums.Role;
 import jakarta.validation.constraints.NotBlank;

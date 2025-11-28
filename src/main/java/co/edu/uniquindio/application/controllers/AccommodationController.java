@@ -1,8 +1,8 @@
 package co.edu.uniquindio.application.controllers;
 
 import co.edu.uniquindio.application.dto.AccommodationDTO;
-import co.edu.uniquindio.application.dto.CreateAccommodationDTO;
-import co.edu.uniquindio.application.dto.EditAccommodationDTO;
+import co.edu.uniquindio.application.dto.create.CreateAccommodationDTO;
+import co.edu.uniquindio.application.dto.edit.EditAccommodationDTO;
 import co.edu.uniquindio.application.dto.ResponseDTO;
 import co.edu.uniquindio.application.services.AccommodationService;
 import jakarta.validation.Valid;

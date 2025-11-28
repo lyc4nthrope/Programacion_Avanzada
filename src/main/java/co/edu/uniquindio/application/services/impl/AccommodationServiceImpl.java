@@ -1,8 +1,8 @@
 package co.edu.uniquindio.application.services.impl;
 
 import co.edu.uniquindio.application.dto.AccommodationDTO;
-import co.edu.uniquindio.application.dto.CreateAccommodationDTO;
-import co.edu.uniquindio.application.dto.EditAccommodationDTO;
+import co.edu.uniquindio.application.dto.create.CreateAccommodationDTO;
+import co.edu.uniquindio.application.dto.edit.EditAccommodationDTO;
 import co.edu.uniquindio.application.exceptions.NotFoundException;
 import co.edu.uniquindio.application.mappers.AccommodationMapper;
 import co.edu.uniquindio.application.models.entitys.Accommodation;

@@ -1,0 +1,40 @@
+### Obtener todos los pagos
+GET http://localhost:8080/api/payments
+
+### Obtener un pago por ID
+GET http://localhost:8080/api/payments/pay-123
+
+### Obtener pago por reserva
+GET http://localhost:8080/api/payments/reservation/res-123
+
+### Crear un pago
+POST http://localhost:8080/api/payments
+Content-Type: application/json
+
+{
+  "reservationId": "res-123",
+  "amount": 500.00,
+  "paymentMethod": "CREDIT_CARD",
+  "transactionReference": "TXN-2025-001"
+}
+
+### Listar pagos por estado
+GET http://localhost:8080/api/payments/status/PENDING
+
+### Procesar un pago
+PUT http://localhost:8080/api/payments/pay-123/process
+
+### Completar un pago
+PUT http://localhost:8080/api/payments/pay-123/complete
+
+### Fallar un pago
+PUT http://localhost:8080/api/payments/pay-123/fail?reason=Tarjeta%20rechazada
+
+### Reembolsar un pago
+PUT http://localhost:8080/api/payments/pay-123/refund
+
+### Obtener total de pagos completados
+GET http://localhost:8080/api/payments/stats/total-completed
+
+### Obtener estadísticas de pagos
+GET http://localhost:8080/api/payments/stats/count-by-status

@@ -1,0 +1,37 @@
+### Obtener todas las reseñas
+GET http://localhost:8080/api/reviews
+
+### Obtener una reseña por ID
+GET http://localhost:8080/api/reviews/1
+
+### Crear una reseña
+POST http://localhost:8080/api/reviews
+Content-Type: application/json
+
+{
+  "accommodationId": "acc-123",
+  "userId": "user-456",
+  "comment": "Excelente alojamiento, muy limpio y acogedor. La ubicación es perfecta.",
+  "rating": 5
+}
+
+### Listar reseñas por alojamiento
+GET http://localhost:8080/api/reviews/accommodation/acc-123
+
+### Listar reseñas por usuario
+GET http://localhost:8080/api/reviews/user/user-456
+
+### Obtener calificación promedio de un alojamiento
+GET http://localhost:8080/api/reviews/accommodation/acc-123/average
+
+### Editar una reseña
+PUT http://localhost:8080/api/reviews/1
+Content-Type: application/json
+
+{
+  "comment": "Muy bueno, aunque el servicio fue un poco lento.",
+  "rating": 4
+}
+
+### Eliminar una reseña
+DELETE http://localhost:8080/api/reviews/1

@@ -1,4 +1,4 @@
-package co.edu.uniquindio.application.dto;
+package co.edu.uniquindio.application.dto.create;
 
 import co.edu.uniquindio.application.models.enums.Role;
 import jakarta.validation.constraints.Email;
