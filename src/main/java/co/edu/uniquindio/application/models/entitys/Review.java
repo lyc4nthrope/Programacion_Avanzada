@@ -19,8 +19,8 @@ public class Review {
 
     // ⭐ RELACIÓN BIDIRECCIONAL - Review es propietario
     @ManyToOne
-    @JoinColumn(name = "place_id", nullable = false)
-    private Place place;
+    @JoinColumn(name = "accommodation_id", nullable = false)
+    private Accommodation accommodation;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

@@ -1,54 +1,51 @@
 package co.edu.uniquindio.application.models.entitys;
 
-import co.edu.uniquindio.application.models.enums.UserStatus;
-import co.edu.uniquindio.application.models.enums.Service;
-import co.edu.uniquindio.application.models.enums.UserStatus;
-import co.edu.uniquindio.application.models.vo.Address;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "accommodation", indexes = {
-        @Index(name = "idx_city", columnList = "address_city"),
-        @Index(name = "idx_host", columnList = "host_id"),
-        @Index(name = "idx_status", columnList = "status")
+        @Index(name = "idx_city", columnList = "city"),
+        @Index(name = "idx_price", columnList = "price_per_night"),
+        @Index(name = "idx_rating", columnList = "average_rating")
 })
 @Getter @Setter
 @Builder @AllArgsConstructor @NoArgsConstructor
 public class Accommodation {
-    // Identificación
-    @Id private String id;
+
+    @Id
+    private String id;  // UUID
 
     // Información básica
-    @Column(nullable = false, length = 150)
+    @Column(length = 150, nullable = false)
     private String title;
 
-    @Column(nullable = false, length = 2000)
+    @Column(length = 2000, nullable = false)
     private String description;
 
-    @Embedded
-    private Address address;
+    @Column(length = 100, nullable = false)
+    private String city;
+
+    @Column(length = 150, nullable = false)
+    private String address;
 
     @Column(nullable = false)
-    private Integer maxCapacity;
+    private Double latitude;
+
+    @Column(nullable = false)
+    private Double longitude;
 
     @Column(nullable = false)
     private Double pricePerNight;
 
-    // Servicios
-    @ElementCollection(targetClass = Service.class, fetch = FetchType.EAGER)
-    @CollectionTable(name = "accommodation_services", joinColumns = @JoinColumn(name = "accommodation_id"))
-    @Enumerated(EnumType.STRING)
-    private Set<Service> services = new HashSet<>();
-
-    // Estado
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserStatus status;
+    private Integer maxCapacity;
+
+    @Column(length = 500)
+    private String amenities;
 
     // Auditoría
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
@@ -58,34 +55,24 @@ public class Accommodation {
     private LocalDateTime updatedAt;
 
     // Métricas
-    @Column private Double averageRating;
-    @Column private Integer ratingCount;
+    @Column
+    private Double averageRating;
 
-    // Relaciones
-    @ManyToOne
-    @JoinColumn(name = "host_id", nullable = false)
-    private User host;
+    @Column
+    private Integer ratingCount;
 
-    @OneToMany(mappedBy = "accommodation", cascade = CascadeType.ALL)
-    private List<AccommodationPhoto> photos;
+    // ⭐ RELACIÓN BIDIRECCIONAL CON REVIEW
+    // mappedBy="place" indica que Review es el propietario
+    // cascade = ALL significa que si eliminas Place, también se eliminan sus Reviews
+    // fetch = LAZY significa que las reviews se cargan bajo demanda (más eficiente)
+    @OneToMany(mappedBy = "accommodation", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
 
-    @OneToMany(mappedBy = "accommodation")
-    private List<Reservation> reservations;
-
-    @OneToMany(mappedBy = "accommodation")
-    private List<Review> reviews;
-
-    @OneToMany(mappedBy = "accommodation", cascade = CascadeType.ALL)
-    private List<AvailabilityCalendar> calendar;
-
-    @OneToMany(mappedBy = "accommodation")
-    private List<Favorite> favorites;
-
+    // Ciclo de vida
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) createdAt = LocalDateTime.now();
         if (updatedAt == null) updatedAt = LocalDateTime.now();
-        if (status == null) status = status.ACTIVE;
         if (averageRating == null) averageRating = 0.0;
         if (ratingCount == null) ratingCount = 0;
     }

@@ -5,7 +5,6 @@ import co.edu.uniquindio.application.dto.CreateAccommodationDTO;
 import co.edu.uniquindio.application.dto.EditAccommodationDTO;
 import co.edu.uniquindio.application.exceptions.NotFoundException;
 import co.edu.uniquindio.application.mappers.AccommodationMapper;
-import co.edu.uniquindio.application.models.entitys.Accommodation;
 import co.edu.uniquindio.application.models.enums.AccommodationStatus;
 import co.edu.uniquindio.application.services.AccommodationService;
 import lombok.RequiredArgsConstructor;
