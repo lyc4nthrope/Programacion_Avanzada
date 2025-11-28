@@ -5,73 +5,65 @@ import co.edu.uniquindio.application.dto.CreateAccommodationDTO;
 import co.edu.uniquindio.application.dto.EditAccommodationDTO;
 import co.edu.uniquindio.application.exceptions.NotFoundException;
 import co.edu.uniquindio.application.mappers.AccommodationMapper;
-import co.edu.uniquindio.application.models.enums.AccommodationStatus;
+import co.edu.uniquindio.application.models.entitys.Accommodation;
+import co.edu.uniquindio.application.repositories.AccommodationRepository;
 import co.edu.uniquindio.application.services.AccommodationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class AccommodationServiceImpl implements AccommodationService {
 
+    private final AccommodationRepository accommodationRepository;
     private final AccommodationMapper accommodationMapper;
-    private final Map<String, Accommodation> accommodationStore = new ConcurrentHashMap<>();
 
     @Override
     public void create(CreateAccommodationDTO accommodationDTO, String hostId) throws Exception {
         // Transformación del DTO a Accommodation
         Accommodation newAccommodation = accommodationMapper.toEntity(accommodationDTO);
-        newAccommodation.setHostId(hostId);
 
-        // Almacenamiento del alojamiento
-        accommodationStore.put(newAccommodation.getId(), newAccommodation);
+        // Almacenamiento del alojamiento en la base de datos
+        accommodationRepository.save(newAccommodation);
     }
 
     @Override
     public AccommodationDTO get(String id) throws Exception {
         // Recuperación del alojamiento
-        Accommodation accommodation = accommodationStore.get(id);
+        Optional<Accommodation> accommodationOptional = accommodationRepository.findById(id);
 
         // Si el alojamiento no existe, lanzar una excepción
-        if (accommodation == null) {
+        if (accommodationOptional.isEmpty()) {
             throw new NotFoundException("El alojamiento con ID '" + id + "' no fue encontrado.");
         }
 
-        // Si el alojamiento está eliminado, lanzar una excepción
-        if (accommodation.getStatus() == AccommodationStatus.DELETED) {
-            throw new NotFoundException("El alojamiento con ID '" + id + "' no está disponible.");
-        }
-
         // Transformación del alojamiento a DTO
-        return accommodationMapper.toAccommodationDTO(accommodation);
+        return accommodationMapper.toAccommodationDTO(accommodationOptional.get());
     }
 
     @Override
     public void delete(String id) throws Exception {
         // Recuperación del alojamiento
-        Accommodation accommodation = accommodationStore.get(id);
+        Optional<Accommodation> accommodationOptional = accommodationRepository.findById(id);
 
         // Si el alojamiento no existe, lanzar una excepción
-        if (accommodation == null) {
+        if (accommodationOptional.isEmpty()) {
             throw new NotFoundException("El alojamiento con ID '" + id + "' no fue encontrado.");
         }
 
-        // Soft delete: marcar como eliminado en lugar de eliminarlo realmente
-        accommodation.setStatus(AccommodationStatus.DELETED);
-        accommodationStore.put(id, accommodation);
+        // Eliminación del alojamiento
+        accommodationRepository.deleteById(id);
     }
 
     @Override
     public List<AccommodationDTO> listAll() {
-        // Obtener todos los alojamientos activos y convertirlos a DTOs
-        return accommodationStore.values()
+        // Obtener todos los alojamientos y convertirlos a DTOs
+        return accommodationRepository.findAll()
                 .stream()
-                .filter(a -> a.getStatus() != AccommodationStatus.DELETED)
                 .map(accommodationMapper::toAccommodationDTO)
                 .collect(Collectors.toList());
     }
@@ -79,9 +71,8 @@ public class AccommodationServiceImpl implements AccommodationService {
     @Override
     public List<AccommodationDTO> listByCity(String city) throws Exception {
         // Filtrar por ciudad
-        return accommodationStore.values()
+        return accommodationRepository.findByCity(city)
                 .stream()
-                .filter(a -> a.getCity().equalsIgnoreCase(city) && a.getStatus() != AccommodationStatus.DELETED)
                 .map(accommodationMapper::toAccommodationDTO)
                 .collect(Collectors.toList());
     }
@@ -89,11 +80,8 @@ public class AccommodationServiceImpl implements AccommodationService {
     @Override
     public List<AccommodationDTO> listByPriceRange(Double minPrice, Double maxPrice) throws Exception {
         // Filtrar por rango de precio
-        return accommodationStore.values()
+        return accommodationRepository.findByPricePerNightBetween(minPrice, maxPrice)
                 .stream()
-                .filter(a -> a.getPricePerNight().doubleValue() >= minPrice &&
-                        a.getPricePerNight().doubleValue() <= maxPrice &&
-                        a.getStatus() != AccommodationStatus.DELETED)
                 .map(accommodationMapper::toAccommodationDTO)
                 .collect(Collectors.toList());
     }
@@ -101,12 +89,15 @@ public class AccommodationServiceImpl implements AccommodationService {
     @Override
     public void edit(String id, EditAccommodationDTO accommodationDTO) throws Exception {
         // Recuperación del alojamiento
-        Accommodation accommodation = accommodationStore.get(id);
+        Optional<Accommodation> accommodationOptional = accommodationRepository.findById(id);
 
         // Si el alojamiento no existe, lanzar una excepción
-        if (accommodation == null) {
+        if (accommodationOptional.isEmpty()) {
             throw new NotFoundException("El alojamiento con ID '" + id + "' no fue encontrado.");
         }
+
+        // Se obtiene el alojamiento que está dentro del Optional
+        Accommodation accommodation = accommodationOptional.get();
 
         // Actualización de los campos del alojamiento
         accommodation.setTitle(accommodationDTO.title());
@@ -119,7 +110,7 @@ public class AccommodationServiceImpl implements AccommodationService {
         accommodation.setMaxCapacity(accommodationDTO.maxCapacity());
         accommodation.setAmenities(accommodationDTO.amenities());
 
-        // Actualización en el almacenamiento
-        accommodationStore.put(id, accommodation);
+        // Almacenamiento del alojamiento actualizado
+        accommodationRepository.save(accommodation);
     }
 }

@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "user", indexes = {
@@ -27,7 +26,7 @@ public class User {
     @Column(length = 15)
     private String phone;
 
-    @Column(length = 100, nullable = false)
+    @Column(length = 100, nullable = false, unique = true)
     private String email;
 
     @Column(length = 200, nullable = false)
@@ -39,7 +38,7 @@ public class User {
     @Column(nullable = false)
     private LocalDate dateBirth;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
@@ -47,4 +46,21 @@ public class User {
 
     @Column(nullable = false)
     private UserStatus status;
+
+    // ⭐ CICLO DE VIDA - Se ejecuta antes de persistir
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+        if (status == null) {
+            status = UserStatus.ACTIVE;
+        }
+    }
+
+    // ⭐ CICLO DE VIDA - Se ejecuta antes de actualizar (si fuera necesario)
+    @PreUpdate
+    protected void onUpdate() {
+        // En este caso, createdAt no debe cambiar, pero se puede agregar lógica adicional
+    }
 }
