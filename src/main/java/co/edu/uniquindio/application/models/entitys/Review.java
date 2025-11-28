@@ -1,6 +1,6 @@
 package co.edu.uniquindio.application.models.entitys;
 
-import co.edu.uniquindio.application.models.entitys.User;
+import co.edu.uniquindio.application.models.vo.Answer;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -10,17 +10,23 @@ import java.time.LocalDateTime;
 @Builder
 @Getter @Setter
 @Entity
+@Table(name = "review")
 public class Review {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Genera el id automáticamente en la base de datos
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne //Llave foránea a la entidad User
-    @JoinColumn(nullable = false)
+    // ⭐ RELACIÓN BIDIRECCIONAL - Review es propietario
+    @ManyToOne
+    @JoinColumn(name = "place_id", nullable = false)
+    private Place place;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Lob // Sirve para textos largos
+    @Lob
     @Column(nullable = false)
     private String comment;
 
@@ -30,4 +36,20 @@ public class Review {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+    private LocalDateTime updatedAt;
+
+    @Embedded
+    private Answer answer;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        if (updatedAt == null) updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }
