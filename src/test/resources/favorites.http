@@ -1,0 +1,41 @@
+### Obtener todos los favoritos
+GET http://localhost:8080/api/favorites
+
+### Obtener un favorito por ID
+GET http://localhost:8080/api/favorites/fav-123
+
+### Agregar a favoritos
+POST http://localhost:8080/api/favorites
+Content-Type: application/json
+
+{
+  "userId": "user-456",
+  "accommodationId": "acc-123"
+}
+
+### Listar favoritos de un usuario
+GET http://localhost:8080/api/favorites/user/user-456
+
+### Listar favoritos de un alojamiento
+GET http://localhost:8080/api/favorites/accommodation/acc-123
+
+### Verificar si es favorito
+GET http://localhost:8080/api/favorites/user/user-456/accommodation/acc-123/check
+
+### Contar favoritos de un usuario
+GET http://localhost:8080/api/favorites/user/user-456/count
+
+### Contar favoritos de un alojamiento
+GET http://localhost:8080/api/favorites/accommodation/acc-123/count
+
+### Obtener estadísticas
+GET http://localhost:8080/api/favorites/stats?userId=user-456
+
+### Obtener estadísticas de alojamiento
+GET http://localhost:8080/api/favorites/stats?accommodationId=acc-123
+
+### Eliminar favorito por ID
+DELETE http://localhost:8080/api/favorites/fav-123
+
+### Eliminar favorito por usuario y alojamiento
+DELETE http://localhost:8080/api/favorites/user/user-456/accommodation/acc-123

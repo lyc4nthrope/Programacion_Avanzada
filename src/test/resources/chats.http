@@ -1,0 +1,37 @@
+### Obtener todos los chats
+GET http://localhost:8080/api/chats
+
+### Obtener chats activos
+GET http://localhost:8080/api/chats/active
+
+### Obtener un chat por ID
+GET http://localhost:8080/api/chats/chat-123
+
+### Crear un chat con múltiples participantes
+POST http://localhost:8080/api/chats
+Content-Type: application/json
+
+{
+  "participantIds": ["user-1", "user-2", "user-3"]
+}
+
+### Obtener chats de un usuario
+GET http://localhost:8080/api/chats/user/user-1
+
+### Obtener chats activos de un usuario
+GET http://localhost:8080/api/chats/user/user-1/active
+
+### Obtener o crear chat entre dos usuarios
+POST http://localhost:8080/api/chats/between/user-1/user-2
+
+### Activar un chat
+PUT http://localhost:8080/api/chats/chat-123/activate
+
+### Desactivar un chat
+PUT http://localhost:8080/api/chats/chat-123/deactivate
+
+### Obtener estadísticas
+GET http://localhost:8080/api/chats/stats
+
+### Eliminar un chat
+DELETE http://localhost:8080/api/chats/chat-123

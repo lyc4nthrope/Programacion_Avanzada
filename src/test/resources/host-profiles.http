@@ -1,0 +1,39 @@
+### Obtener todos los perfiles de anfitrión
+GET http://localhost:8080/api/host-profiles
+
+### Obtener un perfil de anfitrión por ID
+GET http://localhost:8080/api/host-profiles/hp-123
+
+### Obtener perfil de anfitrión por usuario
+GET http://localhost:8080/api/host-profiles/user/user-456
+
+### Crear un perfil de anfitrión
+POST http://localhost:8080/api/host-profiles
+Content-Type: application/json
+
+{
+  "userId": "user-456",
+  "aboutMe": "Soy un anfitrión experimentado con más de 5 años en la plataforma. Me encanta recibir huéspedes de todo el mundo y compartir mi experiencia. Ofrezco alojamientos cómodos y acogedores.",
+  "legalDocument": "Doc-12345-ABC"
+}
+
+### Verificar si un usuario tiene perfil de anfitrión
+GET http://localhost:8080/api/host-profiles/user/user-456/check
+
+### Obtener información del anfitrión
+GET http://localhost:8080/api/host-profiles/user/user-456/info
+
+### Editar perfil de anfitrión
+PUT http://localhost:8080/api/host-profiles/hp-123
+Content-Type: application/json
+
+{
+  "aboutMe": "Soy un anfitrión experimentado con más de 7 años en la plataforma. Especializado en alojamientos de lujo y experiencias premium.",
+  "legalDocument": "Doc-12345-XYZ"
+}
+
+### Obtener estadísticas
+GET http://localhost:8080/api/host-profiles/stats
+
+### Eliminar perfil de anfitrión
+DELETE http://localhost:8080/api/host-profiles/hp-123
