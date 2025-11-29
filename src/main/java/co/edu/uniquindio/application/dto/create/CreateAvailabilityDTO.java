@@ -12,7 +12,7 @@ public record CreateAvailabilityDTO(
         @NotNull(message = "La fecha es requerida")
         LocalDate date,
         
-        @NotNull(message = "La disponibilidad es requerida")
+        @NotNull(message = "El estado de disponibilidad es requerido")
         Boolean available,
         
         @Length(max = 500, message = "La razón no puede exceder 500 caracteres")

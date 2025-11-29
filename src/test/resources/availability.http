@@ -1,0 +1,52 @@
+### Obtener todas las disponibilidades
+GET http://localhost:8080/api/availability
+
+### Obtener una disponibilidad por ID
+GET http://localhost:8080/api/availability/avail-123
+
+### Crear una disponibilidad
+POST http://localhost:8080/api/availability
+Content-Type: application/json
+
+{
+  "accommodationId": "acc-123",
+  "date": "2025-12-20",
+  "available": true,
+  "reason": null
+}
+
+### Obtener disponibilidades de un alojamiento
+GET http://localhost:8080/api/availability/accommodation/acc-123
+
+### Obtener fechas disponibles de un alojamiento
+GET http://localhost:8080/api/availability/accommodation/acc-123/available
+
+### Obtener fechas no disponibles de un alojamiento
+GET http://localhost:8080/api/availability/accommodation/acc-123/unavailable
+
+### Obtener disponibilidades en rango de fechas
+GET http://localhost:8080/api/availability/accommodation/acc-123/range?startDate=2025-12-01&endDate=2025-12-31
+
+### Verificar si una fecha está disponible
+GET http://localhost:8080/api/availability/accommodation/acc-123/date/2025-12-20/check
+
+### Bloquear una fecha
+PUT http://localhost:8080/api/availability/accommodation/acc-123/date/2025-12-25/block?reason=Mantenimiento
+
+### Desbloquear una fecha
+PUT http://localhost:8080/api/availability/accommodation/acc-123/date/2025-12-25/unblock
+
+### Editar una disponibilidad
+PUT http://localhost:8080/api/availability/avail-123
+Content-Type: application/json
+
+{
+  "available": false,
+  "reason": "Reserva previa"
+}
+
+### Obtener estadísticas de disponibilidad
+GET http://localhost:8080/api/availability/accommodation/acc-123/stats
+
+### Eliminar una disponibilidad
+DELETE http://localhost:8080/api/availability/avail-123
