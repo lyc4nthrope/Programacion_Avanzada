@@ -14,16 +14,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailServiceImpl implements EmailService {
 
-    @Value("smtp.gmail.com")
+    @Value("${mail.host}")
     private String smtpHost;
 
-    @Value("587")
+    @Value("${mail.port}")
     private int smtpPort;
 
-    @Value("pruebasprograavanzada@gmail.com")
+    @Value("${mail.username}")
     private String smtpUsername;
 
-    @Value("sdrm cclw xjrn hvmh")
+    @Value("${mail.password}")
     private String smtpPassword;
 
     @Override

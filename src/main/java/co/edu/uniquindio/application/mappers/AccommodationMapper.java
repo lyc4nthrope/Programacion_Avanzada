@@ -16,7 +16,9 @@ public interface AccommodationMapper {
     @Mapping(target = "averageRating", constant = "0.0")
     @Mapping(target = "ratingCount", constant = "0")
     @Mapping(target = "reviews", ignore = true)
+    @Mapping(target = "host", ignore = true)  // ✅ Agregar esta línea
     Accommodation toEntity(CreateAccommodationDTO accommodationDTO);
 
+    @Mapping(source = "host.id", target = "hostId")  // ✅ Mapear el host
     AccommodationDTO toAccommodationDTO(Accommodation accommodation);
 }

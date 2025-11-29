@@ -6,7 +6,9 @@ import co.edu.uniquindio.application.dto.edit.EditAccommodationDTO;
 import co.edu.uniquindio.application.exceptions.NotFoundException;
 import co.edu.uniquindio.application.mappers.AccommodationMapper;
 import co.edu.uniquindio.application.models.entitys.Accommodation;
+import co.edu.uniquindio.application.models.entitys.User;
 import co.edu.uniquindio.application.repositories.AccommodationRepository;
+import co.edu.uniquindio.application.repositories.UserRepository;
 import co.edu.uniquindio.application.services.AccommodationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,13 +23,21 @@ public class AccommodationServiceImpl implements AccommodationService {
 
     private final AccommodationRepository accommodationRepository;
     private final AccommodationMapper accommodationMapper;
+    private final UserRepository userRepository;
 
     @Override
     public void create(CreateAccommodationDTO accommodationDTO, String hostId) throws Exception {
+        // Validar que el host existe
+        Optional<User> host = userRepository.findById(hostId);
+        if (host.isEmpty()) {
+            throw new NotFoundException("El usuario anfitrión con ID '" + hostId + "' no fue encontrado.");
+        }
+
         // Transformación del DTO a Accommodation
         Accommodation newAccommodation = accommodationMapper.toEntity(accommodationDTO);
+        newAccommodation.setHost(host.get());  // ✅ Establecer el host
 
-        // Almacenamiento del alojamiento en la base de datos
+        // Almacenamiento
         accommodationRepository.save(newAccommodation);
     }
 

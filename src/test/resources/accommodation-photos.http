@@ -1,0 +1,23 @@
+### Subir foto de alojamiento
+POST http://localhost:8080/api/accommodation-photos/upload/acc-123
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="photo"; filename="casa.jpg"
+Content-Type: image/jpeg
+
+< ./casa.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="isPrimary"
+
+true
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Obtener fotos de un alojamiento
+GET http://localhost:8080/api/accommodation-photos/acc-123
+
+### Establecer foto como principal
+PUT http://localhost:8080/api/accommodation-photos/photo-123/set-primary
+
+### Eliminar foto
+DELETE http://localhost:8080/api/accommodation-photos/photo-123

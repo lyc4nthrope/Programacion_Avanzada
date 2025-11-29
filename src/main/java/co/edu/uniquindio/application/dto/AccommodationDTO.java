@@ -10,7 +10,7 @@ public record AccommodationDTO(
         String address,
         Double latitude,
         Double longitude,
-        BigDecimal pricePerNight,
+        Double pricePerNight,
         Integer maxCapacity,
         String amenities,
         Double averageRating,

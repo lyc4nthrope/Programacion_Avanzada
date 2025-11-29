@@ -13,7 +13,7 @@ public record CreateAccommodationDTO(
         @NotBlank @Length(max = 150) String address,
         @NotNull Double latitude,
         @NotNull Double longitude,
-        @NotNull @Positive BigDecimal pricePerNight,
+        @NotNull @Positive Double pricePerNight,
         @NotNull @Positive Integer maxCapacity,
         String amenities
 ) {
