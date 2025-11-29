@@ -1,0 +1,49 @@
+### Obtener todos los mensajes
+GET http://localhost:8080/api/messages
+
+### Obtener un mensaje por ID
+GET http://localhost:8080/api/messages/msg-123
+
+### Enviar un mensaje
+POST http://localhost:8080/api/messages
+Content-Type: application/json
+
+{
+  "chatId": "chat-123",
+  "senderId": "user-1",
+  "recipientId": "user-2",
+  "content": "Hola, ¿cómo estás? ¿Te interesa el alojamiento?"
+}
+
+### Obtener mensajes de un chat
+GET http://localhost:8080/api/messages/chat/chat-123
+
+### Obtener mensajes de un chat ordenados por fecha
+GET http://localhost:8080/api/messages/chat/chat-123/ordered
+
+### Obtener mensajes no leídos de un usuario
+GET http://localhost:8080/api/messages/user/user-1/unread
+
+### Obtener mensajes no leídos de un chat
+GET http://localhost:8080/api/messages/chat/chat-123/unread
+
+### Obtener mensajes entre dos usuarios en un chat
+GET http://localhost:8080/api/messages/chat/chat-123/between/user-1/user-2
+
+### Marcar un mensaje como leído
+PUT http://localhost:8080/api/messages/msg-123/read
+
+### Marcar todos los mensajes del chat como leídos
+PUT http://localhost:8080/api/messages/chat/chat-123/read-all
+
+### Contar mensajes no leídos de un usuario
+GET http://localhost:8080/api/messages/user/user-1/unread/count
+
+### Obtener último mensaje de un chat
+GET http://localhost:8080/api/messages/chat/chat-123/last
+
+### Obtener estadísticas de un usuario
+GET http://localhost:8080/api/messages/stats/user/user-1
+
+### Eliminar un mensaje
+DELETE http://localhost:8080/api/messages/msg-123
