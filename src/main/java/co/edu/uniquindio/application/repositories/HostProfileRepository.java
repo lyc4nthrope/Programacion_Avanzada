@@ -15,6 +15,4 @@ public interface HostProfileRepository extends JpaRepository<HostProfile, String
     // Verificar si un usuario tiene perfil de anfitrión
     boolean existsByUserId(String userId);
 
-    // Contar perfiles de anfitrión
-    Long countAllProfiles();
 }

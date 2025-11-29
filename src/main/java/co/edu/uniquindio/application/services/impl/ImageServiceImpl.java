@@ -3,6 +3,7 @@ package co.edu.uniquindio.application.services.impl;
 import co.edu.uniquindio.application.services.ImageService;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
@@ -16,19 +17,22 @@ public class ImageServiceImpl implements ImageService {
 
     private final Cloudinary cloudinary;
 
-    public ImageServiceImpl(){
+    public ImageServiceImpl(
+            @Value("${cloudinary.cloud-name}") String cloudName,
+            @Value("${cloudinary.api-key}") String apiKey,
+            @Value("${cloudinary.api-secret}") String apiSecret) {
         Map<String, String> config = new HashMap<>();
-        config.put("cloud_name", "mediaflows_29b36efa-3f57-4348-bb");
-        config.put("api_key", "434269423898254");
-        config.put("api_secret", "AOLJ5BpyHZd7j3MpmUhrxricaYo");
+        config.put("cloud_name", cloudName);
+        config.put("api_key", apiKey);
+        config.put("api_secret", apiSecret);
         cloudinary = new Cloudinary(config);
     }
 
     @Override
     public Map upload(MultipartFile image) throws Exception {
         File file = convert(image);
-        // Reemplace "app_name" con el nombre de la carpeta donde se guardarán las imágenes en Cloudinary
-        return cloudinary.uploader().upload(file, ObjectUtils.asMap("folder", "Proyecto Progra Avanzada"));
+        return cloudinary.uploader().upload(file,
+                ObjectUtils.asMap("folder", "${cloudinary.folder}"));
     }
 
     @Override

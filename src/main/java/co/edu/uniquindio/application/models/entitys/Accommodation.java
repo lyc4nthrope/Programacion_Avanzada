@@ -68,6 +68,10 @@ public class Accommodation {
     @OneToMany(mappedBy = "accommodation", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "host_id", nullable = false)
+    private User host;  // Referencia al usuario anfitrión
+
     // Ciclo de vida
     @PrePersist
     protected void onCreate() {
