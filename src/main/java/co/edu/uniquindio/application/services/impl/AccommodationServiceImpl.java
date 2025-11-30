@@ -9,9 +9,11 @@ import co.edu.uniquindio.application.mappers.AccommodationMapper;
 import co.edu.uniquindio.application.models.entitys.Accommodation;
 import co.edu.uniquindio.application.models.entitys.User;
 import co.edu.uniquindio.application.models.enums.AccommodationStatus;
+import co.edu.uniquindio.application.models.enums.Role;
 import co.edu.uniquindio.application.repositories.AccommodationRepository;
 import co.edu.uniquindio.application.repositories.UserRepository;
 import co.edu.uniquindio.application.services.AccommodationService;
+import co.edu.uniquindio.application.services.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +30,7 @@ public class AccommodationServiceImpl implements AccommodationService {
     private final AccommodationRepository accommodationRepository;
     private final AccommodationMapper accommodationMapper;
     private final UserRepository userRepository;
+    private final AuthService authService;
 
     // ========================================
     // OPERACIONES CRUD BÁSICAS
@@ -35,9 +38,27 @@ public class AccommodationServiceImpl implements AccommodationService {
 
     @Override
     public void create(CreateAccommodationDTO accommodationDTO, String hostId) throws Exception {
+        // ✅ OBTENER USUARIO AUTENTICADO
+        String authenticatedUserId = authService.getAuthenticatedUserId();
+
+        // ✅ VALIDAR: Solo puede crear alojamientos para sí mismo
+        if (!hostId.equals(authenticatedUserId)) {
+            throw new InvalidOperationException(
+                    "Solo puedes crear alojamientos como tu propio anfitrión. " +
+                            "No puedes crear alojamientos en nombre de otros usuarios."
+            );
+        }
+
         Optional<User> host = userRepository.findById(hostId);
         if (host.isEmpty()) {
             throw new NotFoundException("El usuario anfitrión con ID '" + hostId + "' no fue encontrado.");
+        }
+
+        // ✅ VALIDAR: El usuario debe tener rol HOST
+        if (host.get().getRole() != Role.HOST && host.get().getRole() != Role.ADMIN) {
+            throw new InvalidOperationException(
+                    "Solo los usuarios con rol HOST o ADMIN pueden crear alojamientos."
+            );
         }
 
         Accommodation newAccommodation = accommodationMapper.toEntity(accommodationDTO);
@@ -56,12 +77,25 @@ public class AccommodationServiceImpl implements AccommodationService {
 
     @Override
     public void edit(String id, EditAccommodationDTO accommodationDTO) throws Exception {
+
+        // OBTENER USUARIO AUTENTICADO
+        String authenticatedUserId = authService.getAuthenticatedUserId();
+
         Optional<Accommodation> accommodationOptional = accommodationRepository.findById(id);
         if (accommodationOptional.isEmpty()) {
             throw new NotFoundException("El alojamiento con ID '" + id + "' no fue encontrado.");
         }
 
         Accommodation accommodation = accommodationOptional.get();
+
+        // VALIDAR: Solo el anfitrión propietario puede editar su alojamiento
+        if (!accommodation.getHost().getId().equals(authenticatedUserId)) {
+            throw new InvalidOperationException(
+                    "Solo puedes editar tus propios alojamientos. " +
+                            "Este alojamiento pertenece a otro anfitrión."
+            );
+        }
+
         accommodation.setTitle(accommodationDTO.title());
         accommodation.setDescription(accommodationDTO.description());
         accommodation.setCity(accommodationDTO.city());
@@ -76,10 +110,23 @@ public class AccommodationServiceImpl implements AccommodationService {
 
     @Override
     public void delete(String id) throws Exception {
+        // OBTENER USUARIO AUTENTICADO
+        String authenticatedUserId = authService.getAuthenticatedUserId();
+
         Optional<Accommodation> accommodationOptional = accommodationRepository.findById(id);
         if (accommodationOptional.isEmpty()) {
             throw new NotFoundException("El alojamiento con ID '" + id + "' no fue encontrado.");
         }
+
+        Accommodation accommodation = accommodationOptional.get();
+
+        // VALIDAR: Solo el anfitrión propietario puede eliminar su alojamiento
+        if (!accommodation.getHost().getId().equals(authenticatedUserId)) {
+            throw new InvalidOperationException(
+                    "Solo puedes eliminar tus propios alojamientos."
+            );
+        }
+
         accommodationRepository.deleteById(id);
     }
 

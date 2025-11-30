@@ -9,6 +9,7 @@ import co.edu.uniquindio.application.exceptions.ValueConflictException;
 import co.edu.uniquindio.application.models.entitys.User;
 import co.edu.uniquindio.application.models.enums.UserStatus;
 import co.edu.uniquindio.application.repositories.UserRepository;
+import co.edu.uniquindio.application.services.AuthService;
 import co.edu.uniquindio.application.services.UserService;
 import co.edu.uniquindio.application.mappers.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final AuthService authService;
 
 
     @Override
@@ -64,15 +66,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(String id) throws Exception {
-        // Recuperación del usuario
-        Optional<User> userOptional = userRepository.findById(id);
+        // ✅ OBTENER USUARIO AUTENTICADO
+        String authenticatedUserId = authService.getAuthenticatedUserId();
 
-        // Validación del usuario
+        // ✅ VALIDAR: Un usuario solo puede eliminar su propia cuenta
+        if (!id.equals(authenticatedUserId)) {
+            throw new InvalidOperationException(
+                    "Solo puedes eliminar tu propia cuenta."
+            );
+        }
+
+        Optional<User> userOptional = userRepository.findById(id);
         if (userOptional.isEmpty()) {
             throw new NotFoundException("Usuario con ID '" + id + "' no encontrado.");
         }
 
-        // Eliminación física del usuario
         userRepository.delete(userOptional.get());
     }
 
@@ -86,9 +94,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void edit(String id, EditUserDTO userDTO) throws Exception {
+        String authenticatedUserId = authService.getAuthenticatedUserId();
+
+        // ✅ VALIDAR: Un usuario solo puede editar su propio perfil
+        // (a menos que sea ADMIN - lo veremos en autorización por roles)
+        if (!id.equals(authenticatedUserId)) {
+            throw new InvalidOperationException(
+                    "Solo puedes editar tu propio perfil. " +
+                            "No tienes permisos para editar el perfil de otros usuarios."
+            );
+        }
+
         // Recuperación del usuario
         Optional<User> userOptional = userRepository.findById(id);
-
         // Validación del usuario
         if (userOptional.isEmpty()) {
             throw new NotFoundException("Usuario con ID '" + id + "' no encontrado.");

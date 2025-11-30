@@ -1,10 +1,12 @@
 package co.edu.uniquindio.application.config;
 
+import co.edu.uniquindio.application.security.CustomAccessDeniedHandler;
 import co.edu.uniquindio.application.security.JwtAuthenticationEntryPoint;
 import co.edu.uniquindio.application.security.JWTFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -27,6 +29,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JWTFilter jwtFilter;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -36,15 +39,45 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> req
-                        // Rutas públicas (sin autenticación)
+                        // ✅ RUTAS PÚBLICAS (sin autenticación)
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/greeting/**").permitAll()
-                        
-                        // Todas las demás rutas requieren autenticación
+
+                        // ✅ CONSULTAS PÚBLICAS (solo lectura, sin autenticación)
+                        .requestMatchers(HttpMethod.GET, "/api/accommodations/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/accommodation/**").permitAll()
+
+                        // ✅ SOLO GUEST (usuarios normales)
+                        .requestMatchers(HttpMethod.POST, "/api/reservations").hasAuthority("GUEST")
+                        .requestMatchers(HttpMethod.PUT, "/api/reservations/*/cancel").hasAuthority("GUEST")
+                        .requestMatchers(HttpMethod.POST, "/api/favorites").hasAuthority("GUEST")
+                        .requestMatchers(HttpMethod.POST, "/api/reviews").hasAnyAuthority("GUEST", "HOST")
+
+                        // ✅ SOLO HOST (anfitriones)
+                        .requestMatchers(HttpMethod.POST, "/api/accommodations").hasAuthority("HOST")
+                        .requestMatchers(HttpMethod.PUT, "/api/accommodations/*").hasAuthority("HOST")
+                        .requestMatchers(HttpMethod.DELETE, "/api/accommodations/*").hasAuthority("HOST")
+                        .requestMatchers(HttpMethod.POST, "/api/host-profiles").hasAuthority("HOST")
+                        .requestMatchers(HttpMethod.PUT, "/api/reservations/*/confirm").hasAuthority("HOST")
+
+                        // ✅ SOLO ADMIN (administradores)
+                        .requestMatchers(HttpMethod.GET, "/api/users").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/*").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/*/activate").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/*/deactivate").hasAuthority("ADMIN")
+
+                        // ✅ GUEST o ADMIN (usuarios normales o administradores)
+                        .requestMatchers(HttpMethod.GET, "/api/users/*").hasAnyAuthority("GUEST", "HOST", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/*").hasAnyAuthority("GUEST", "HOST", "ADMIN")
+
+                        // ✅ Cualquier usuario autenticado
                         .anyRequest().authenticated()
                 )
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(new JwtAuthenticationEntryPoint()))
+                .exceptionHandling(ex -> {
+                    ex.authenticationEntryPoint(new JwtAuthenticationEntryPoint());
+                    ex.accessDeniedHandler(accessDeniedHandler);
+                })
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -56,7 +89,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(false); // Cambiado a false cuando allowedOrigins es "*"
+        config.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

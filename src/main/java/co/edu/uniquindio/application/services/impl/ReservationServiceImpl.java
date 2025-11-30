@@ -13,6 +13,7 @@ import co.edu.uniquindio.application.models.enums.ReservationStatus;
 import co.edu.uniquindio.application.repositories.AccommodationRepository;
 import co.edu.uniquindio.application.repositories.ReservationRepository;
 import co.edu.uniquindio.application.repositories.UserRepository;
+import co.edu.uniquindio.application.services.AuthService;
 import co.edu.uniquindio.application.services.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -31,9 +32,20 @@ public class ReservationServiceImpl implements ReservationService {
     private final ReservationMapper reservationMapper;
     private final AccommodationRepository accommodationRepository;
     private final UserRepository userRepository;
+    private final AuthService authService;
 
     @Override
     public void create(CreateReservationDTO reservationDTO) throws Exception {
+        String authenticatedUserId = authService.getAuthenticatedUserId();
+
+        //VALIDAR: Solo puede crear reservas para sí mismo
+        if (!reservationDTO.guestId().equals(authenticatedUserId)) {
+            throw new InvalidOperationException(
+                    "Solo puedes crear reservas para ti mismo. " +
+                            "No puedes crear reservas en nombre de otros usuarios."
+            );
+        }
+
         if (reservationDTO.checkInDate().isAfter(reservationDTO.checkOutDate())) {
             throw new InvalidOperationException("La fecha de entrada no puede ser posterior a la fecha de salida.");
         }
@@ -135,12 +147,22 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public void edit(String id, EditReservationDTO reservationDTO) throws Exception {
+        //OBTENER USUARIO AUTENTICADO
+        String authenticatedUserId = authService.getAuthenticatedUserId();
+
         Optional<Reservation> reservationOptional = reservationRepository.findById(id);
         if (reservationOptional.isEmpty()) {
             throw new NotFoundException("La reserva con ID '" + id + "' no fue encontrada.");
         }
 
         Reservation reservation = reservationOptional.get();
+
+        //VALIDAR: Solo el huésped puede editar su propia reserva
+        if (!reservation.getGuest().getId().equals(authenticatedUserId)) {
+            throw new InvalidOperationException(
+                    "Solo puedes editar tus propias reservas."
+            );
+        }
 
         if (reservation.getStatus() == ReservationStatus.CANCELLED) {
             throw new InvalidOperationException("No se puede editar una reserva cancelada.");
@@ -189,14 +211,27 @@ public class ReservationServiceImpl implements ReservationService {
         reservationRepository.save(reservation);
     }
 
+
     @Override
     public void cancel(String id) throws Exception {
+        // ✅ OBTENER USUARIO AUTENTICADO
+        String authenticatedUserId = authService.getAuthenticatedUserId();
+
         Optional<Reservation> reservationOptional = reservationRepository.findById(id);
         if (reservationOptional.isEmpty()) {
             throw new NotFoundException("La reserva con ID '" + id + "' no fue encontrada.");
         }
 
         Reservation reservation = reservationOptional.get();
+
+        // ✅ VALIDAR: Solo el huésped puede cancelar su propia reserva
+        if (!reservation.getGuest().getId().equals(authenticatedUserId)) {
+            throw new InvalidOperationException(
+                    "Solo puedes cancelar tus propias reservas. " +
+                            "Esta reserva pertenece a otro usuario."
+            );
+        }
+
         if (reservation.getCheckInDate().isBefore(LocalDate.now())) {
             throw new InvalidOperationException("No se puede cancelar una reserva que ya ha iniciado.");
         }

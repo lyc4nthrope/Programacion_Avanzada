@@ -11,6 +11,7 @@ import co.edu.uniquindio.application.models.entitys.User;
 import co.edu.uniquindio.application.repositories.AccommodationRepository;
 import co.edu.uniquindio.application.repositories.FavoriteRepository;
 import co.edu.uniquindio.application.repositories.UserRepository;
+import co.edu.uniquindio.application.services.AuthService;
 import co.edu.uniquindio.application.services.FavoriteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,9 +28,20 @@ public class FavoriteServiceImpl implements FavoriteService {
     private final FavoriteMapper favoriteMapper;
     private final UserRepository userRepository;
     private final AccommodationRepository accommodationRepository;
+    private final AuthService authService;
 
     @Override
     public void addFavorite(CreateFavoriteDTO favoriteDTO) throws Exception {
+        // OBTENER USUARIO AUTENTICADO
+        String authenticatedUserId = authService.getAuthenticatedUserId();
+
+        // VALIDAR: Solo puede agregar favoritos para sí mismo
+        if (!favoriteDTO.userId().equals(authenticatedUserId)) {
+            throw new InvalidOperationException(
+                    "Solo puedes agregar favoritos en tu propia cuenta."
+            );
+        }
+
         // Validar que el usuario existe
         Optional<User> user = userRepository.findById(favoriteDTO.userId());
         if (user.isEmpty()) {

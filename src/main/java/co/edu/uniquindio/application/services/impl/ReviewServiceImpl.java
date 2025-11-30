@@ -14,6 +14,7 @@ import co.edu.uniquindio.application.repositories.AccommodationRepository;
 import co.edu.uniquindio.application.repositories.ReservationRepository;
 import co.edu.uniquindio.application.repositories.ReviewRepository;
 import co.edu.uniquindio.application.repositories.UserRepository;
+import co.edu.uniquindio.application.services.AuthService;
 import co.edu.uniquindio.application.services.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,10 +31,22 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewMapper reviewMapper;
     private final AccommodationRepository accommodationRepository;
     private final UserRepository userRepository;
-    private final ReservationRepository reservationRepository;  // ✅ NUEVO
+    private final ReservationRepository reservationRepository;
+    private final AuthService authService;
 
     @Override
     public void create(CreateReviewDTO reviewDTO) throws Exception {
+        // OBTENER USUARIO AUTENTICADO
+        String authenticatedUserId = authService.getAuthenticatedUserId();
+
+        // VALIDAR: Solo puede crear reseñas como sí mismo
+        if (!reviewDTO.userId().equals(authenticatedUserId)) {
+            throw new InvalidOperationException(
+                    "Solo puedes crear reseñas en tu propio nombre. " +
+                            "No puedes crear reseñas como otro usuario."
+            );
+        }
+
         // Validar que el alojamiento existe
         Optional<Accommodation> accommodation = accommodationRepository.findById(reviewDTO.accommodationId());
         if (accommodation.isEmpty()) {
@@ -46,7 +59,7 @@ public class ReviewServiceImpl implements ReviewService {
             throw new NotFoundException("El usuario con ID '" + reviewDTO.userId() + "' no fue encontrado.");
         }
 
-        // ✅ NUEVO: Validar reserva si se proporciona
+        // NUEVO: Validar reserva si se proporciona
         Reservation reservation = null;
         if (reviewDTO.reservationId() != null && !reviewDTO.reservationId().isEmpty()) {
             Optional<Reservation> reservationOptional = reservationRepository.findById(reviewDTO.reservationId());
@@ -99,19 +112,25 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public void delete(Long id) throws Exception {
-        Optional<Review> reviewOptional = reviewRepository.findById(id);
+        // OBTENER USUARIO AUTENTICADO
+        String authenticatedUserId = authService.getAuthenticatedUserId();
 
+        Optional<Review> reviewOptional = reviewRepository.findById(id);
         if (reviewOptional.isEmpty()) {
             throw new NotFoundException("La reseña con ID '" + id + "' no fue encontrada.");
         }
 
         Review review = reviewOptional.get();
+
+        // VALIDAR: Solo el autor puede eliminar su reseña
+        if (!review.getUser().getId().equals(authenticatedUserId)) {
+            throw new InvalidOperationException(
+                    "Solo puedes eliminar tus propias reseñas."
+            );
+        }
+
         String accommodationId = review.getAccommodation().getId();
-
-        // Eliminar reseña
         reviewRepository.deleteById(id);
-
-        // Actualizar calificación promedio
         updateAccommodationRating(accommodationId);
     }
 
@@ -151,23 +170,30 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public void edit(Long id, EditReviewDTO reviewDTO) throws Exception {
-        Optional<Review> reviewOptional = reviewRepository.findById(id);
+        // OBTENER USUARIO AUTENTICADO
+        String authenticatedUserId = authService.getAuthenticatedUserId();
 
+        Optional<Review> reviewOptional = reviewRepository.findById(id);
         if (reviewOptional.isEmpty()) {
             throw new NotFoundException("La reseña con ID '" + id + "' no fue encontrada.");
         }
 
         Review review = reviewOptional.get();
+
+        // VALIDAR: Solo el autor puede editar su reseña
+        if (!review.getUser().getId().equals(authenticatedUserId)) {
+            throw new InvalidOperationException(
+                    "Solo puedes editar tus propias reseñas."
+            );
+        }
+
         String accommodationId = review.getAccommodation().getId();
 
         // Actualizar campos
         review.setComment(reviewDTO.comment());
         review.setRating(reviewDTO.rating());
 
-        // Guardar cambios
         reviewRepository.save(review);
-
-        // Actualizar calificación promedio
         updateAccommodationRating(accommodationId);
     }
 

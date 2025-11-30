@@ -37,4 +37,6 @@ public class JWTUtils {
         byte[] secretKeyBytes = secretKey.getBytes();
         return Keys.hmacShaKeyFor(secretKeyBytes);
     }
+
+
 }
