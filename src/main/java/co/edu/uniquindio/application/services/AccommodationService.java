@@ -15,8 +15,6 @@ public interface AccommodationService {
     AccommodationDTO get(String id) throws Exception;
     void delete(String id) throws Exception;
     List<AccommodationDTO> listAll();
-    List<AccommodationDTO> listByCity(String city) throws Exception;
-    List<AccommodationDTO> listByPriceRange(Double minPrice, Double maxPrice) throws Exception;
     void edit(String id, EditAccommodationDTO accommodationDTO) throws Exception;
 
     // Gestión de status

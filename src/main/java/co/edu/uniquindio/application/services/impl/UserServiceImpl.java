@@ -190,10 +190,22 @@ public class UserServiceImpl implements UserService {
         Optional<User> userOptional = userRepository.findByEmail(email);
 
         if (userOptional.isEmpty()) {
-            throw new NotFoundException("No existe un usuario con el email: " + email);
+            throw new NotFoundException("Credenciales inválidas"); // No revelar si existe el email
         }
 
-        return userMapper.toUserDTO(userOptional.get());
+        User user = userOptional.get();
+
+        // ✅ Verificar contraseña
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new InvalidOperationException("Credenciales inválidas");
+        }
+
+        // ✅ Verificar que el usuario esté activo
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new InvalidOperationException("El usuario no está activo");
+        }
+
+        return userMapper.toUserDTO(user);
     }
 
 }

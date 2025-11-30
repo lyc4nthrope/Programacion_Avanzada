@@ -21,33 +21,27 @@ public interface AccommodationRepository extends JpaRepository<Accommodation, St
     // ✅ EJERCICIO 4: Búsqueda por texto con paginación (nombre contiene texto, ignore case)
     Page<Accommodation> findByTitleContainingIgnoreCase(String text, Pageable pageable);
 
-    // Consultas existentes
-    List<Accommodation> findByCity(String city);
-    List<Accommodation> findByPricePerNightBetween(Double minPrice, Double maxPrice);
+    // Consultas básicas necesarias (usadas en AccommodationServiceImpl)
     Optional<Accommodation> findByTitle(String title);
-    List<Accommodation> findByMaxCapacityGreaterThanEqual(Integer capacity);
     List<Accommodation> findByStatusEquals(AccommodationStatus status);
-
-    @Query("SELECT a FROM Accommodation a WHERE a.averageRating >= :minRating")
-    List<Accommodation> findByMinimumRating(@Param("minRating") Double minRating);
 
     // ✅ EJERCICIO 5: Consultas personalizadas adicionales
 
     // 1. Buscar alojamientos activos por ciudad con precio menor o igual
     @Query("SELECT a FROM Accommodation a WHERE a.city = :city AND a.pricePerNight <= :maxPrice AND a.status = 'ACTIVE'")
     Page<Accommodation> findActiveByCityAndMaxPrice(
-        @Param("city") String city, 
-        @Param("maxPrice") Double maxPrice, 
-        Pageable pageable
+            @Param("city") String city,
+            @Param("maxPrice") Double maxPrice,
+            Pageable pageable
     );
 
     // 2. Buscar alojamientos con capacidad mínima y rating mínimo
     @Query("SELECT a FROM Accommodation a WHERE a.maxCapacity >= :minCapacity " +
-           "AND a.averageRating >= :minRating AND a.status = 'ACTIVE' ORDER BY a.averageRating DESC")
+            "AND a.averageRating >= :minRating AND a.status = 'ACTIVE' ORDER BY a.averageRating DESC")
     Page<Accommodation> findByCapacityAndRating(
-        @Param("minCapacity") Integer minCapacity,
-        @Param("minRating") Double minRating,
-        Pageable pageable
+            @Param("minCapacity") Integer minCapacity,
+            @Param("minRating") Double minRating,
+            Pageable pageable
     );
 
     // 3. Buscar alojamientos más populares (con más reseñas)
@@ -56,21 +50,21 @@ public interface AccommodationRepository extends JpaRepository<Accommodation, St
 
     // 4. Buscar alojamientos por rango de precio con ordenamiento
     @Query("SELECT a FROM Accommodation a WHERE a.pricePerNight BETWEEN :minPrice AND :maxPrice " +
-           "AND a.status = 'ACTIVE'")
+            "AND a.status = 'ACTIVE'")
     Page<Accommodation> findByPriceRangeActive(
-        @Param("minPrice") Double minPrice,
-        @Param("maxPrice") Double maxPrice,
-        Pageable pageable
+            @Param("minPrice") Double minPrice,
+            @Param("maxPrice") Double maxPrice,
+            Pageable pageable
     );
 
     // 5. Buscar alojamientos cerca de una ubicación (radio aproximado)
     @Query("SELECT a FROM Accommodation a WHERE a.status = 'ACTIVE' AND " +
-           "SQRT(POWER(a.latitude - :latitude, 2) + POWER(a.longitude - :longitude, 2)) < :radius " +
-           "ORDER BY SQRT(POWER(a.latitude - :latitude, 2) + POWER(a.longitude - :longitude, 2))")
+            "SQRT(POWER(a.latitude - :latitude, 2) + POWER(a.longitude - :longitude, 2)) < :radius " +
+            "ORDER BY SQRT(POWER(a.latitude - :latitude, 2) + POWER(a.longitude - :longitude, 2))")
     Page<Accommodation> findNearLocation(
-        @Param("latitude") Double latitude,
-        @Param("longitude") Double longitude,
-        @Param("radius") Double radius,
-        Pageable pageable
+            @Param("latitude") Double latitude,
+            @Param("longitude") Double longitude,
+            @Param("radius") Double radius,
+            Pageable pageable
     );
 }

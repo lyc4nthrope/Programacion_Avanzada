@@ -68,22 +68,6 @@ public class AccommodationServiceImpl implements AccommodationService {
     }
 
     @Override
-    public List<AccommodationDTO> listByCity(String city) throws Exception {
-        return accommodationRepository.findByCity(city)
-                .stream()
-                .map(accommodationMapper::toAccommodationDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<AccommodationDTO> listByPriceRange(Double minPrice, Double maxPrice) throws Exception {
-        return accommodationRepository.findByPricePerNightBetween(minPrice, maxPrice)
-                .stream()
-                .map(accommodationMapper::toAccommodationDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public void edit(String id, EditAccommodationDTO accommodationDTO) throws Exception {
         Optional<Accommodation> accommodationOptional = accommodationRepository.findById(id);
         if (accommodationOptional.isEmpty()) {
