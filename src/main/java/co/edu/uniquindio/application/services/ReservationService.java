@@ -4,7 +4,9 @@ import co.edu.uniquindio.application.dto.create.CreateReservationDTO;
 import co.edu.uniquindio.application.dto.edit.EditReservationDTO;
 import co.edu.uniquindio.application.dto.ReservationDTO;
 import co.edu.uniquindio.application.models.enums.ReservationStatus;
+import org.springframework.data.domain.Sort;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ReservationService {
@@ -40,5 +42,15 @@ public interface ReservationService {
     void cancel(String id) throws Exception;
 
     // Verificar disponibilidad de fechas
-    boolean isAvailable(String accommodationId, java.time.LocalDate checkInDate, java.time.LocalDate checkOutDate) throws Exception;
+    boolean isAvailable(String accommodationId, LocalDate checkInDate, LocalDate checkOutDate) throws Exception;
+
+    // ✅ EJERCICIO 3: Reportes de usuario con ordenamiento
+    List<ReservationDTO> listByGuestSorted(String guestId, Sort sort) throws Exception;
+
+    // ✅ EJERCICIO 5: Consultas personalizadas
+    List<ReservationDTO> listByDateRange(LocalDate startDate, LocalDate endDate, Sort sort);
+    List<ReservationDTO> listActiveReservationsByGuest(String guestId, Sort sort) throws Exception;
+    List<ReservationDTO> listCompletedReservationsByGuest(String guestId, Sort sort) throws Exception;
+    List<ReservationDTO> listUpcomingReservations(Sort sort);
+    List<ReservationDTO> listByAccommodationAndStatus(String accommodationId, ReservationStatus status, Sort sort) throws Exception;
 }

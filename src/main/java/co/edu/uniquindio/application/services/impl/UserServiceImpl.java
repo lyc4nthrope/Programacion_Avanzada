@@ -184,4 +184,16 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.toUserDTO(userOptional.get());
     }
+
+    @Override
+    public UserDTO authenticate(String email, String password) throws Exception {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+
+        if (userOptional.isEmpty()) {
+            throw new NotFoundException("No existe un usuario con el email: " + email);
+        }
+
+        return userMapper.toUserDTO(userOptional.get());
+    }
+
 }

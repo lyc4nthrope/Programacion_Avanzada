@@ -60,8 +60,6 @@ public class UserController {
         return ResponseEntity.ok(new ResponseDTO<>(false, "El usuario ha sido actualizado"));
     }
 
-    // ✅ NUEVOS ENDPOINTS PARA GESTIONAR STATUS
-
     @GetMapping("/active")
     public ResponseEntity<ResponseDTO<List<UserDTO>>> listActive() {
         List<UserDTO> list = userService.listActiveUsers();
@@ -96,5 +94,19 @@ public class UserController {
     public ResponseEntity<ResponseDTO<Boolean>> checkEmailExists(@PathVariable String email) {
         boolean exists = userService.emailExists(email);
         return ResponseEntity.ok(new ResponseDTO<>(false, exists));
+    }
+
+    // ✅ EJERCICIO 2: ENDPOINT DE AUTENTICACIÓN
+    /**
+     * Autentica un usuario con email y contraseña
+     * POST /api/users/authenticate
+     */
+    @PostMapping("/authenticate")
+    public ResponseEntity<ResponseDTO<UserDTO>> authenticate(
+            @RequestParam String email,
+            @RequestParam String password) throws Exception {
+        
+        UserDTO authenticatedUser = userService.authenticate(email, password);
+        return ResponseEntity.ok(new ResponseDTO<>(false, authenticatedUser));
     }
 }

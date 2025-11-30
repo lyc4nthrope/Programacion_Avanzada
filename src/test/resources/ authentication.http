@@ -1,0 +1,94 @@
+### ========================================
+### EJERCICIO 2: AUTENTICACIÓN DE USUARIO
+### ========================================
+
+### ✅ PASO 1: Crear un usuario de prueba
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Usuario Prueba",
+  "phone": "3001234567",
+  "email": "prueba@test.com",
+  "password": "Password123",
+  "photoUrl": "",
+  "dateBirth": "1995-05-15",
+  "role": "GUEST"
+}
+
+###
+
+### ✅ PASO 2: Autenticar con credenciales correctas
+POST http://localhost:8080/api/users/authenticate?email=prueba@test.com&password=Password123
+
+### Respuesta esperada:
+# {
+#   "error": false,
+#   "content": {
+#     "id": "...",
+#     "name": "Usuario Prueba",
+#     "phone": "3001234567",
+#     "email": "prueba@test.com",
+#     "photoUrl": "",
+#     "dateBirth": "1995-05-15",
+#     "role": "GUEST"
+#   }
+# }
+
+###
+
+### ❌ CASO DE ERROR 1: Contraseña incorrecta
+POST http://localhost:8080/api/users/authenticate?email=prueba@test.com&password=WrongPassword123
+
+### Respuesta esperada:
+# {
+#   "error": true,
+#   "content": "Credenciales inválidas"
+# }
+
+###
+
+### ❌ CASO DE ERROR 2: Email no existe
+POST http://localhost:8080/api/users/authenticate?email=noexiste@test.com&password=Password123
+
+### Respuesta esperada:
+# {
+#   "error": true,
+#   "content": "Credenciales inválidas"
+# }
+
+###
+
+### ❌ CASO DE ERROR 3: Usuario inactivo
+# Primero desactivar el usuario
+PUT http://localhost:8080/api/users/{{userId}}/deactivate
+
+###
+
+# Intentar autenticar
+POST http://localhost:8080/api/users/authenticate?email=prueba@test.com&password=Password123
+
+### Respuesta esperada:
+# {
+#   "error": true,
+#   "content": "El usuario no está activo"
+# }
+
+###
+
+### ========================================
+### PRUEBAS ADICIONALES
+### ========================================
+
+### Autenticar usuario que ya existe en el sistema
+POST http://localhost:8080/api/users/authenticate?email=cristhian@email.com&password=Abc123456
+
+###
+
+### Probar con mayúsculas/minúsculas en email
+POST http://localhost:8080/api/users/authenticate?email=PRUEBA@TEST.COM&password=Password123
+
+###
+
+### Probar con espacios en la contraseña (debe fallar)
+POST http://localhost:8080/api/users/authenticate?email=prueba@test.com&password=Password 123
