@@ -8,6 +8,7 @@ public record ReviewDTO(
         String accommodationId,
         String userId,
         String userName,
+        String reservationId,  // ✅ NUEVO CAMPO
         String comment,
         Integer rating,
         LocalDateTime createdAt,

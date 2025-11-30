@@ -15,11 +15,13 @@ public interface ReviewMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "accommodation", ignore = true)
     @Mapping(target = "user", ignore = true)
+    @Mapping(target = "reservation", ignore = true)  // ✅ Se establece en el servicio si existe
     @Mapping(target = "answer", ignore = true)
     Review toEntity(CreateReviewDTO createReviewDTO);
 
     @Mapping(source = "user.name", target = "userName")
     @Mapping(source = "accommodation.id", target = "accommodationId")
     @Mapping(source = "user.id", target = "userId")
+    @Mapping(source = "reservation.id", target = "reservationId")  // ✅ NUEVO
     ReviewDTO toReviewDTO(Review review);
 }

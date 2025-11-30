@@ -1,8 +1,37 @@
 ### Obtener todos los usuarios
 GET http://localhost:8080/api/users
 
-### Obtener un usuario por id (cambie 1 por el id del usuario que desea obtener)
+###
+
+### Obtener solo usuarios ACTIVOS
+GET http://localhost:8080/api/users/active
+
+###
+
+### Filtrar usuarios por estado
+GET http://localhost:8080/api/users?status=ACTIVE
+
+###
+
+### Obtener usuarios INACTIVOS
+GET http://localhost:8080/api/users?status=INACTIVE
+
+###
+
+### Obtener un usuario por id
 GET http://localhost:8080/api/users/1
+
+###
+
+### Obtener usuario por email
+GET http://localhost:8080/api/users/email/cristhian@email.com
+
+###
+
+### Verificar si un email existe
+GET http://localhost:8080/api/users/email/cristhian@email.com/exists
+
+###
 
 ### Crear un usuario
 POST http://localhost:8080/api/users
@@ -15,10 +44,12 @@ Content-Type: application/json
   "password": "Abc123456",
   "photoUrl": "",
   "dateBirth": "2000-08-22",
-  "role": "USER"
+  "role": "GUEST"
 }
 
-### Actualizar un usuario (cambie 1 por el id del usuario que desea actualizar)
+###
+
+### Actualizar un usuario
 PUT http://localhost:8080/api/users/1
 Content-Type: application/json
 
@@ -27,8 +58,206 @@ Content-Type: application/json
   "phone": "333333",
   "photoUrl": "mi foto",
   "dateBirth": "2000-08-22",
-  "role": "USER"
+  "role": "GUEST"
 }
 
-### Eliminar un usuario (cambie 1 por el id del usuario que desea eliminar)
+###
+
+### Eliminar un usuario (eliminación física)
 DELETE http://localhost:8080/api/users/1
+
+###
+
+### ✅ NUEVOS ENDPOINTS DE GESTIÓN DE ESTADO
+
+### Activar un usuario
+PUT http://localhost:8080/api/users/1/activate
+
+###
+
+### Desactivar un usuario
+PUT http://localhost:8080/api/users/1/deactivate
+
+###
+
+### Soft Delete - Marcar como eliminado
+DELETE http://localhost:8080/api/users/1/soft
+
+###
+
+### FLUJO COMPLETO DE PRUEBA:
+
+### 1. Crear un usuario (por defecto será ACTIVE)
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Juan Pérez",
+  "phone": "3001234567",
+  "email": "juan.perez@email.com",
+  "password": "Password123",
+  "photoUrl": "",
+  "dateBirth": "1995-05-15",
+  "role": "HOST"
+}
+
+###
+
+### 2. Verificar que se creó con status ACTIVE
+GET http://localhost:8080/api/users/1
+
+###
+
+### 3. Desactivar el usuario
+PUT http://localhost:8080/api/users/1/deactivate
+
+###
+
+### 4. Verificar que el estado cambió a INACTIVE
+GET http://localhost:8080/api/users/1
+
+###
+
+### 5. Activar nuevamente
+PUT http://localhost:8080/api/users/1/activate
+
+###
+
+### 6. Realizar soft delete
+DELETE http://localhost:8080/api/users/1/soft
+
+###
+
+### 7. Intentar activar un usuario eliminado (DEBE FALLAR)
+PUT http://localhost:8080/api/users/1/activate
+
+### Respuesta esperada:
+# {
+#   "error": true,
+#   "content": "No se puede activar un usuario eliminado. Debe crearse uno nuevo."
+# }
+
+###
+
+### 8. Verificar si un email existe antes de crear usuario
+GET http://localhost:8080/api/users/email/juan.perez@email.com/exists
+
+###
+
+### 9. Buscar usuario por email
+GET http://localhost:8080/api/users/email/juan.perez@email.com
+
+###
+
+### CASOS DE ERROR:
+
+### Error 1: Email duplicado
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Pedro López",
+  "phone": "3009876543",
+  "email": "cristhian@email.com",
+  "password": "Password123",
+  "photoUrl": "",
+  "dateBirth": "1992-03-10",
+  "role": "GUEST"
+}
+
+### Respuesta esperada:
+# {
+#   "error": true,
+#   "content": "El correo electrónico ya está en uso."
+# }
+
+###
+
+### Error 2: Usuario no encontrado
+GET http://localhost:8080/api/users/99999
+
+###
+
+### Error 3: Email no encontrado
+GET http://localhost:8080/api/users/email/noexiste@email.com
+
+###
+
+### Error 4: Contraseña muy corta
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Ana García",
+  "phone": "3001112233",
+  "email": "ana@email.com",
+  "password": "123",
+  "photoUrl": "",
+  "dateBirth": "1998-07-20",
+  "role": "GUEST"
+}
+
+### Respuesta esperada:
+# {
+#   "error": true,
+#   "content": [
+#     {
+#       "field": "password",
+#       "message": "length must be between 7 and 20"
+#     }
+#   ]
+# }
+
+###
+
+### Error 5: Email inválido
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Carlos Ruiz",
+  "phone": "3005556677",
+  "email": "emailinvalido",
+  "password": "Password123",
+  "photoUrl": "",
+  "dateBirth": "1990-12-01",
+  "role": "GUEST"
+}
+
+### Respuesta esperada:
+# {
+#   "error": true,
+#   "content": [
+#     {
+#       "field": "email",
+#       "message": "must be a well-formed email address"
+#     }
+#   ]
+# }
+
+###
+
+### Error 6: Fecha de nacimiento futura
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "María Gómez",
+  "phone": "3007778899",
+  "email": "maria@email.com",
+  "password": "Password123",
+  "photoUrl": "",
+  "dateBirth": "2030-01-01",
+  "role": "GUEST"
+}
+
+### Respuesta esperada:
+# {
+#   "error": true,
+#   "content": [
+#     {
+#       "field": "dateBirth",
+#       "message": "must be a past date"
+#     }
+#   ]
+# }

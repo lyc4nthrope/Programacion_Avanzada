@@ -3,12 +3,15 @@ package co.edu.uniquindio.application.services.impl;
 import co.edu.uniquindio.application.dto.create.CreateReviewDTO;
 import co.edu.uniquindio.application.dto.edit.EditReviewDTO;
 import co.edu.uniquindio.application.dto.ReviewDTO;
+import co.edu.uniquindio.application.exceptions.InvalidOperationException;
 import co.edu.uniquindio.application.exceptions.NotFoundException;
 import co.edu.uniquindio.application.mappers.ReviewMapper;
 import co.edu.uniquindio.application.models.entitys.Accommodation;
+import co.edu.uniquindio.application.models.entitys.Reservation;
 import co.edu.uniquindio.application.models.entitys.Review;
 import co.edu.uniquindio.application.models.entitys.User;
 import co.edu.uniquindio.application.repositories.AccommodationRepository;
+import co.edu.uniquindio.application.repositories.ReservationRepository;
 import co.edu.uniquindio.application.repositories.ReviewRepository;
 import co.edu.uniquindio.application.repositories.UserRepository;
 import co.edu.uniquindio.application.services.ReviewService;
@@ -27,6 +30,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewMapper reviewMapper;
     private final AccommodationRepository accommodationRepository;
     private final UserRepository userRepository;
+    private final ReservationRepository reservationRepository;  // ✅ NUEVO
 
     @Override
     public void create(CreateReviewDTO reviewDTO) throws Exception {
@@ -42,10 +46,38 @@ public class ReviewServiceImpl implements ReviewService {
             throw new NotFoundException("El usuario con ID '" + reviewDTO.userId() + "' no fue encontrado.");
         }
 
+        // ✅ NUEVO: Validar reserva si se proporciona
+        Reservation reservation = null;
+        if (reviewDTO.reservationId() != null && !reviewDTO.reservationId().isEmpty()) {
+            Optional<Reservation> reservationOptional = reservationRepository.findById(reviewDTO.reservationId());
+            
+            if (reservationOptional.isEmpty()) {
+                throw new NotFoundException("La reserva con ID '" + reviewDTO.reservationId() + "' no fue encontrada.");
+            }
+
+            reservation = reservationOptional.get();
+
+            // Validar que la reserva pertenece al usuario que hace la reseña
+            if (!reservation.getGuest().getId().equals(reviewDTO.userId())) {
+                throw new InvalidOperationException("No puedes crear una reseña para una reserva que no te pertenece.");
+            }
+
+            // Validar que la reserva sea del alojamiento que se está reseñando
+            if (!reservation.getAccommodation().getId().equals(reviewDTO.accommodationId())) {
+                throw new InvalidOperationException("La reserva no corresponde al alojamiento que intentas reseñar.");
+            }
+
+            // Validar que la reserva no tenga ya una reseña
+            if (reservation.getReview() != null) {
+                throw new InvalidOperationException("Esta reserva ya tiene una reseña asociada.");
+            }
+        }
+
         // Crear la reseña
         Review newReview = reviewMapper.toEntity(reviewDTO);
         newReview.setAccommodation(accommodation.get());
         newReview.setUser(user.get());
+        newReview.setReservation(reservation);  // ✅ Asignar reserva si existe
 
         // Guardar la reseña
         reviewRepository.save(newReview);
@@ -158,7 +190,7 @@ public class ReviewServiceImpl implements ReviewService {
                 .orElse(0.0);
     }
 
-    //actualizar calificación promedio
+    // Actualizar calificación promedio
     private void updateAccommodationRating(String accommodationId) throws NotFoundException {
         Optional<Accommodation> accommodation = accommodationRepository.findById(accommodationId);
 

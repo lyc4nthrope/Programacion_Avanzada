@@ -1,0 +1,199 @@
+### ========================
+### GESTIÓN DE IMÁGENES - CLOUDINARY
+### ========================
+
+### 1. Subir una imagen
+POST http://localhost:8080/api/images
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="casa.jpg"
+Content-Type: image/jpeg
+
+< ./casa.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Respuesta esperada:
+# {
+#   "error": false,
+#   "content": {
+#     "public_id": "accommodation_photos/abc123",
+#     "version": 1234567890,
+#     "signature": "abcd1234...",
+#     "width": 1920,
+#     "height": 1080,
+#     "format": "jpg",
+#     "resource_type": "image",
+#     "created_at": "2025-11-29T10:00:00Z",
+#     "tags": [],
+#     "bytes": 245678,
+#     "type": "upload",
+#     "etag": "d41d8cd98f00b204e9800998ecf8427e",
+#     "placeholder": false,
+#     "url": "http://res.cloudinary.com/demo/image/upload/v1234567890/accommodation_photos/abc123.jpg",
+#     "secure_url": "https://res.cloudinary.com/demo/image/upload/v1234567890/accommodation_photos/abc123.jpg",
+#     "access_mode": "public",
+#     "original_filename": "casa"
+#   }
+# }
+
+###
+
+### 2. Eliminar una imagen por public_id
+DELETE http://localhost:8080/api/images?id=accommodation_photos/abc123
+
+### Respuesta esperada:
+# {
+#   "error": false,
+#   "content": "Imagen eliminada exitosamente"
+# }
+
+###
+
+### ========================
+### EJEMPLOS PRÁCTICOS
+### ========================
+
+### Ejemplo 1: Subir imagen de perfil de usuario
+POST http://localhost:8080/api/images
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="perfil.jpg"
+Content-Type: image/jpeg
+
+< ./perfil.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+
+### Ejemplo 2: Subir imagen de alojamiento
+POST http://localhost:8080/api/images
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="alojamiento1.jpg"
+Content-Type: image/jpeg
+
+< ./alojamiento1.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+
+### Ejemplo 3: Subir imagen PNG
+POST http://localhost:8080/api/images
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="logo.png"
+Content-Type: image/png
+
+< ./logo.png
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+
+### ========================
+### CASOS DE ERROR
+### ========================
+
+### Error 1: Eliminar imagen inexistente
+DELETE http://localhost:8080/api/images?id=accommodation_photos/noexiste
+
+### Respuesta esperada:
+# {
+#   "error": true,
+#   "content": "Error al eliminar la imagen"
+# }
+
+###
+
+### Error 2: Subir archivo sin especificar
+POST http://localhost:8080/api/images
+Content-Type: multipart/form-data
+
+###
+
+### Error 3: ID de imagen inválido
+DELETE http://localhost:8080/api/images?id=
+
+###
+
+### ========================
+### NOTAS IMPORTANTES
+### ========================
+
+# 1. Los archivos deben existir en el sistema de archivos local
+#    Reemplaza "./casa.jpg" con la ruta real de tu imagen
+
+# 2. Formatos soportados: JPG, JPEG, PNG, GIF, WEBP
+
+# 3. El public_id retornado debe usarse para eliminar la imagen
+
+# 4. Las imágenes se suben a la carpeta configurada en:
+#    application.properties -> cloudinary.folder
+
+# 5. La URL segura (secure_url) es la que debes guardar en la BD
+
+###
+
+### ========================
+### INTEGRACIÓN CON OTROS ENDPOINTS
+### ========================
+
+### Flujo completo: Crear usuario con foto
+# 1. Subir imagen
+POST http://localhost:8080/api/images
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="foto_perfil.jpg"
+Content-Type: image/jpeg
+
+< ./foto_perfil.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+# 2. Copiar la URL de la respuesta (secure_url)
+
+# 3. Crear usuario usando esa URL
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Pedro López",
+  "phone": "3001234567",
+  "email": "pedro@email.com",
+  "password": "Password123",
+  "photoUrl": "https://res.cloudinary.com/demo/image/upload/v1234567890/accommodation_photos/abc123.jpg",
+  "dateBirth": "1990-05-15",
+  "role": "GUEST"
+}
+
+###
+
+### Flujo completo: Actualizar foto de perfil
+# 1. Subir nueva imagen
+POST http://localhost:8080/api/images
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="nueva_foto.jpg"
+Content-Type: image/jpeg
+
+< ./nueva_foto.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+# 2. Actualizar usuario con nueva URL
+PUT http://localhost:8080/api/users/1
+Content-Type: application/json
+
+{
+  "name": "Pedro López",
+  "phone": "3001234567",
+  "photoUrl": "https://res.cloudinary.com/demo/image/upload/v9876543210/accommodation_photos/xyz789.jpg",
+  "dateBirth": "1990-05-15",
+  "role": "GUEST"
+}
+
+# 3. Eliminar imagen anterior (opcional)
+DELETE http://localhost:8080/api/images?id=accommodation_photos/abc123

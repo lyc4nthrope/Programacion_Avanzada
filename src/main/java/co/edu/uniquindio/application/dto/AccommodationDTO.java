@@ -1,6 +1,6 @@
 package co.edu.uniquindio.application.dto;
 
-import java.math.BigDecimal;
+import co.edu.uniquindio.application.models.enums.AccommodationStatus;
 
 public record AccommodationDTO(
         String id,
@@ -14,6 +14,7 @@ public record AccommodationDTO(
         Integer maxCapacity,
         String amenities,
         Double averageRating,
-        String hostId
+        String hostId,
+        AccommodationStatus status  // ✅ NUEVO CAMPO
 ) {
 }

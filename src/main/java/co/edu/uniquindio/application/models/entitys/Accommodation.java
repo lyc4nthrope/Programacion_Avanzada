@@ -1,5 +1,6 @@
 package co.edu.uniquindio.application.models.entitys;
 
+import co.edu.uniquindio.application.models.enums.AccommodationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -10,7 +11,8 @@ import java.util.List;
 @Table(name = "accommodation", indexes = {
         @Index(name = "idx_city", columnList = "city"),
         @Index(name = "idx_price", columnList = "price_per_night"),
-        @Index(name = "idx_rating", columnList = "average_rating")
+        @Index(name = "idx_rating", columnList = "average_rating"),
+        @Index(name = "idx_status", columnList = "status")
 })
 @Getter @Setter
 @Builder @AllArgsConstructor @NoArgsConstructor
@@ -47,6 +49,11 @@ public class Accommodation {
     @Column(length = 500)
     private String amenities;
 
+    // ✅ NUEVO: Estado del alojamiento
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private AccommodationStatus status;
+
     // Auditoría
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
@@ -62,15 +69,13 @@ public class Accommodation {
     private Integer ratingCount;
 
     // ⭐ RELACIÓN BIDIRECCIONAL CON REVIEW
-    // mappedBy="place" indica que Review es el propietario
-    // cascade = ALL significa que si eliminas Place, también se eliminan sus Reviews
-    // fetch = LAZY significa que las reviews se cargan bajo demanda (más eficiente)
     @OneToMany(mappedBy = "accommodation", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
+    // ⭐ RELACIÓN CON HOST (Usuario anfitrión)
     @ManyToOne
     @JoinColumn(name = "host_id", nullable = false)
-    private User host;  // Referencia al usuario anfitrión
+    private User host;
 
     // Ciclo de vida
     @PrePersist
@@ -79,6 +84,7 @@ public class Accommodation {
         if (updatedAt == null) updatedAt = LocalDateTime.now();
         if (averageRating == null) averageRating = 0.0;
         if (ratingCount == null) ratingCount = 0;
+        if (status == null) status = AccommodationStatus.ACTIVE; // ✅ Por defecto ACTIVE
     }
 
     @PreUpdate

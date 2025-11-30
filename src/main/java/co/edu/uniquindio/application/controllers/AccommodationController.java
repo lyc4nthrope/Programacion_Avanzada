@@ -4,6 +4,7 @@ import co.edu.uniquindio.application.dto.AccommodationDTO;
 import co.edu.uniquindio.application.dto.create.CreateAccommodationDTO;
 import co.edu.uniquindio.application.dto.edit.EditAccommodationDTO;
 import co.edu.uniquindio.application.dto.ResponseDTO;
+import co.edu.uniquindio.application.models.enums.AccommodationStatus;
 import co.edu.uniquindio.application.services.AccommodationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -50,12 +51,17 @@ public class AccommodationController {
     public ResponseEntity<ResponseDTO<List<AccommodationDTO>>> listAll(
             @RequestParam(required = false) String city,
             @RequestParam(required = false) Double minPrice,
-            @RequestParam(required = false) Double maxPrice
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) AccommodationStatus status
     ) throws Exception {
         List<AccommodationDTO> list;
 
+        // Filtrar por estado si se proporciona
+        if (status != null) {
+            list = accommodationService.listByStatus(status);
+        }
         // Filtrar por ciudad si se proporciona
-        if (city != null && !city.isEmpty()) {
+        else if (city != null && !city.isEmpty()) {
             list = accommodationService.listByCity(city);
         }
         // Filtrar por rango de precio si se proporciona
@@ -68,5 +74,39 @@ public class AccommodationController {
         }
 
         return ResponseEntity.ok(new ResponseDTO<>(false, list));
+    }
+
+    // ✅ NUEVOS ENDPOINTS PARA GESTIONAR STATUS
+
+    @GetMapping("/active")
+    public ResponseEntity<ResponseDTO<List<AccommodationDTO>>> listActive() {
+        List<AccommodationDTO> list = accommodationService.listActive();
+        return ResponseEntity.ok(new ResponseDTO<>(false, list));
+    }
+
+    @PutMapping("/{id}/activate")
+    public ResponseEntity<ResponseDTO<String>> activate(@PathVariable String id) throws Exception {
+        accommodationService.activate(id);
+        return ResponseEntity.ok(new ResponseDTO<>(false, "El alojamiento ha sido activado"));
+    }
+
+    @PutMapping("/{id}/deactivate")
+    public ResponseEntity<ResponseDTO<String>> deactivate(@PathVariable String id) throws Exception {
+        accommodationService.deactivate(id);
+        return ResponseEntity.ok(new ResponseDTO<>(false, "El alojamiento ha sido desactivado"));
+    }
+
+    @DeleteMapping("/{id}/soft")
+    public ResponseEntity<ResponseDTO<String>> softDelete(@PathVariable String id) throws Exception {
+        accommodationService.softDelete(id);
+        return ResponseEntity.ok(new ResponseDTO<>(false, "El alojamiento ha sido marcado como eliminado"));
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<ResponseDTO<String>> changeStatus(
+            @PathVariable String id,
+            @RequestParam AccommodationStatus status) throws Exception {
+        accommodationService.changeStatus(id, status);
+        return ResponseEntity.ok(new ResponseDTO<>(false, "El estado del alojamiento ha sido cambiado a: " + status));
     }
 }

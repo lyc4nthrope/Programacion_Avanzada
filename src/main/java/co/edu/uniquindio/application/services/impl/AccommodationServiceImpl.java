@@ -3,10 +3,12 @@ package co.edu.uniquindio.application.services.impl;
 import co.edu.uniquindio.application.dto.AccommodationDTO;
 import co.edu.uniquindio.application.dto.create.CreateAccommodationDTO;
 import co.edu.uniquindio.application.dto.edit.EditAccommodationDTO;
+import co.edu.uniquindio.application.exceptions.InvalidOperationException;
 import co.edu.uniquindio.application.exceptions.NotFoundException;
 import co.edu.uniquindio.application.mappers.AccommodationMapper;
 import co.edu.uniquindio.application.models.entitys.Accommodation;
 import co.edu.uniquindio.application.models.entitys.User;
+import co.edu.uniquindio.application.models.enums.AccommodationStatus;
 import co.edu.uniquindio.application.repositories.AccommodationRepository;
 import co.edu.uniquindio.application.repositories.UserRepository;
 import co.edu.uniquindio.application.services.AccommodationService;
@@ -35,7 +37,7 @@ public class AccommodationServiceImpl implements AccommodationService {
 
         // Transformación del DTO a Accommodation
         Accommodation newAccommodation = accommodationMapper.toEntity(accommodationDTO);
-        newAccommodation.setHost(host.get());  // ✅ Establecer el host
+        newAccommodation.setHost(host.get());
 
         // Almacenamiento
         accommodationRepository.save(newAccommodation);
@@ -65,7 +67,7 @@ public class AccommodationServiceImpl implements AccommodationService {
             throw new NotFoundException("El alojamiento con ID '" + id + "' no fue encontrado.");
         }
 
-        // Eliminación del alojamiento
+        // Eliminación física del alojamiento
         accommodationRepository.deleteById(id);
     }
 
@@ -121,6 +123,60 @@ public class AccommodationServiceImpl implements AccommodationService {
         accommodation.setAmenities(accommodationDTO.amenities());
 
         // Almacenamiento del alojamiento actualizado
+        accommodationRepository.save(accommodation);
+    }
+
+    // ✅ NUEVOS MÉTODOS PARA GESTIONAR STATUS
+
+    @Override
+    public void activate(String id) throws Exception {
+        changeStatus(id, AccommodationStatus.ACTIVE);
+    }
+
+    @Override
+    public void deactivate(String id) throws Exception {
+        changeStatus(id, AccommodationStatus.INACTIVE);
+    }
+
+    @Override
+    public void softDelete(String id) throws Exception {
+        changeStatus(id, AccommodationStatus.DELETED);
+    }
+
+    @Override
+    public List<AccommodationDTO> listByStatus(AccommodationStatus status) {
+        return accommodationRepository.findByStatusEquals(status)
+                .stream()
+                .map(accommodationMapper::toAccommodationDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<AccommodationDTO> listActive() {
+        return listByStatus(AccommodationStatus.ACTIVE);
+    }
+
+    @Override
+    public void changeStatus(String id, AccommodationStatus newStatus) throws Exception {
+        // Validar que el alojamiento existe
+        Optional<Accommodation> accommodationOptional = accommodationRepository.findById(id);
+
+        if (accommodationOptional.isEmpty()) {
+            throw new NotFoundException("El alojamiento con ID '" + id + "' no fue encontrado.");
+        }
+
+        Accommodation accommodation = accommodationOptional.get();
+
+        // Validar que no se intente activar un alojamiento eliminado
+        if (accommodation.getStatus() == AccommodationStatus.DELETED && 
+            newStatus == AccommodationStatus.ACTIVE) {
+            throw new InvalidOperationException(
+                "No se puede activar un alojamiento eliminado. Debe crearse uno nuevo."
+            );
+        }
+
+        // Cambiar el estado
+        accommodation.setStatus(newStatus);
         accommodationRepository.save(accommodation);
     }
 }

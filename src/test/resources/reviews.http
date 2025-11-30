@@ -1,10 +1,14 @@
 ### Obtener todas las reseñas
 GET http://localhost:8080/api/reviews
 
+###
+
 ### Obtener una reseña por ID
 GET http://localhost:8080/api/reviews/1
 
-### Crear una reseña
+###
+
+### Crear una reseña SIN reserva
 POST http://localhost:8080/api/reviews
 Content-Type: application/json
 
@@ -15,14 +19,36 @@ Content-Type: application/json
   "rating": 5
 }
 
+###
+
+### ✅ NUEVO: Crear una reseña CON reserva asociada
+POST http://localhost:8080/api/reviews
+Content-Type: application/json
+
+{
+  "accommodationId": "acc-123",
+  "userId": "user-456",
+  "reservationId": "res-789",
+  "comment": "Gran experiencia, el alojamiento superó nuestras expectativas. Todo estuvo perfecto durante nuestra estadía.",
+  "rating": 5
+}
+
+###
+
 ### Listar reseñas por alojamiento
 GET http://localhost:8080/api/reviews/accommodation/acc-123
+
+###
 
 ### Listar reseñas por usuario
 GET http://localhost:8080/api/reviews/user/user-456
 
+###
+
 ### Obtener calificación promedio de un alojamiento
 GET http://localhost:8080/api/reviews/accommodation/acc-123/average
+
+###
 
 ### Editar una reseña
 PUT http://localhost:8080/api/reviews/1
@@ -33,5 +59,189 @@ Content-Type: application/json
   "rating": 4
 }
 
+###
+
 ### Eliminar una reseña
 DELETE http://localhost:8080/api/reviews/1
+
+###
+
+### FLUJO COMPLETO CON RESERVA:
+
+### 1. Crear una reserva primero (necesario para el ejemplo)
+POST http://localhost:8080/api/reservations
+Content-Type: application/json
+
+{
+  "accommodationId": "acc-123",
+  "guestId": "user-456",
+  "checkInDate": "2025-01-15",
+  "checkOutDate": "2025-01-20",
+  "numberOfGuests": 2
+}
+
+###
+
+### 2. Crear reseña vinculada a la reserva
+POST http://localhost:8080/api/reviews
+Content-Type: application/json
+
+{
+  "accommodationId": "acc-123",
+  "userId": "user-456",
+  "reservationId": "res-123",
+  "comment": "Increíble experiencia. El alojamiento es tal cual se ve en las fotos. El anfitrión fue muy atento.",
+  "rating": 5
+}
+
+###
+
+### 3. Verificar que la reseña se creó con la reserva asociada
+GET http://localhost:8080/api/reviews/1
+
+### Respuesta esperada:
+# {
+#   "error": false,
+#   "content": {
+#     "id": 1,
+#     "accommodationId": "acc-123",
+#     "userId": "user-456",
+#     "userName": "Cristhian",
+#     "reservationId": "res-123",
+#     "comment": "Increíble experiencia...",
+#     "rating": 5,
+#     "createdAt": "2025-11-29T10:00:00",
+#     "updatedAt": "2025-11-29T10:00:00",
+#     "answer": null
+#   }
+# }
+
+###
+
+### CASOS DE ERROR:
+
+### Error 1: Intentar crear reseña con reserva inexistente
+POST http://localhost:8080/api/reviews
+Content-Type: application/json
+
+{
+  "accommodationId": "acc-123",
+  "userId": "user-456",
+  "reservationId": "res-999999",
+  "comment": "Excelente lugar",
+  "rating": 5
+}
+
+### Respuesta esperada:
+# {
+#   "error": true,
+#   "content": "La reserva con ID 'res-999999' no fue encontrada."
+# }
+
+###
+
+### Error 2: Intentar crear reseña para reserva de otro usuario
+POST http://localhost:8080/api/reviews
+Content-Type: application/json
+
+{
+  "accommodationId": "acc-123",
+  "userId": "user-999",
+  "reservationId": "res-123",
+  "comment": "Muy bueno",
+  "rating": 4
+}
+
+### Respuesta esperada:
+# {
+#   "error": true,
+#   "content": "No puedes crear una reseña para una reserva que no te pertenece."
+# }
+
+###
+
+### Error 3: Intentar crear reseña para reserva de otro alojamiento
+POST http://localhost:8080/api/reviews
+Content-Type: application/json
+
+{
+  "accommodationId": "acc-999",
+  "userId": "user-456",
+  "reservationId": "res-123",
+  "comment": "Buen lugar",
+  "rating": 4
+}
+
+### Respuesta esperada:
+# {
+#   "error": true,
+#   "content": "La reserva no corresponde al alojamiento que intentas reseñar."
+# }
+
+###
+
+### Error 4: Intentar crear segunda reseña para la misma reserva
+POST http://localhost:8080/api/reviews
+Content-Type: application/json
+
+{
+  "accommodationId": "acc-123",
+  "userId": "user-456",
+  "reservationId": "res-123",
+  "comment": "Segunda reseña",
+  "rating": 5
+}
+
+### Respuesta esperada:
+# {
+#   "error": true,
+#   "content": "Esta reserva ya tiene una reseña asociada."
+# }
+
+###
+
+### Error 5: Comentario muy corto
+POST http://localhost:8080/api/reviews
+Content-Type: application/json
+
+{
+  "accommodationId": "acc-123",
+  "userId": "user-456",
+  "comment": "Bien",
+  "rating": 5
+}
+
+### Respuesta esperada:
+# {
+#   "error": true,
+#   "content": [
+#     {
+#       "field": "comment",
+#       "message": "El comentario debe tener entre 10 y 2000 caracteres"
+#     }
+#   ]
+# }
+
+###
+
+### Error 6: Rating inválido
+POST http://localhost:8080/api/reviews
+Content-Type: application/json
+
+{
+  "accommodationId": "acc-123",
+  "userId": "user-456",
+  "comment": "Excelente lugar, muy recomendado",
+  "rating": 6
+}
+
+### Respuesta esperada:
+# {
+#   "error": true,
+#   "content": [
+#     {
+#       "field": "rating",
+#       "message": "La calificación máxima es 5"
+#     }
+#   ]
+# }
