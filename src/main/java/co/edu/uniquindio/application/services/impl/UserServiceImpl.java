@@ -13,6 +13,7 @@ import co.edu.uniquindio.application.services.UserService;
 import co.edu.uniquindio.application.mappers.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,7 +26,8 @@ public class UserServiceImpl implements UserService {
     
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
+
 
     @Override
     public void create(CreateUserDTO userDTO) throws Exception {
