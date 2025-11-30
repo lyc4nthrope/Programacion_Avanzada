@@ -15,6 +15,7 @@ import co.edu.uniquindio.application.repositories.ReservationRepository;
 import co.edu.uniquindio.application.repositories.UserRepository;
 import co.edu.uniquindio.application.services.ReservationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -33,7 +34,6 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public void create(CreateReservationDTO reservationDTO) throws Exception {
-        // Validar que las fechas sean válidas
         if (reservationDTO.checkInDate().isAfter(reservationDTO.checkOutDate())) {
             throw new InvalidOperationException("La fecha de entrada no puede ser posterior a la fecha de salida.");
         }
@@ -42,35 +42,29 @@ public class ReservationServiceImpl implements ReservationService {
             throw new InvalidOperationException("La fecha de entrada y salida no pueden ser iguales.");
         }
 
-        // Validar que el alojamiento existe
         Optional<Accommodation> accommodation = accommodationRepository.findById(reservationDTO.accommodationId());
         if (accommodation.isEmpty()) {
             throw new NotFoundException("El alojamiento con ID '" + reservationDTO.accommodationId() + "' no fue encontrado.");
         }
 
-        // Validar que el huésped existe
         Optional<User> guest = userRepository.findById(reservationDTO.guestId());
         if (guest.isEmpty()) {
             throw new NotFoundException("El huésped con ID '" + reservationDTO.guestId() + "' no fue encontrado.");
         }
 
-        // Validar capacidad máxima
         if (reservationDTO.numberOfGuests() > accommodation.get().getMaxCapacity()) {
             throw new InvalidOperationException("El número de huéspedes (" + reservationDTO.numberOfGuests() +
                     ") excede la capacidad máxima (" + accommodation.get().getMaxCapacity() + ").");
         }
 
-        // Verificar disponibilidad
         if (!isAvailable(reservationDTO.accommodationId(), reservationDTO.checkInDate(), reservationDTO.checkOutDate())) {
             throw new InvalidOperationException("El alojamiento no está disponible para las fechas seleccionadas.");
         }
 
-        // Crear la reserva
         Reservation newReservation = reservationMapper.toEntity(reservationDTO);
         newReservation.setAccommodation(accommodation.get());
         newReservation.setGuest(guest.get());
 
-        // Calcular precio total
         long nights = java.time.temporal.ChronoUnit.DAYS.between(
                 reservationDTO.checkInDate(),
                 reservationDTO.checkOutDate()
@@ -78,29 +72,24 @@ public class ReservationServiceImpl implements ReservationService {
         double totalPrice = accommodation.get().getPricePerNight() * nights;
         newReservation.setTotalPrice(totalPrice);
 
-        // Guardar la reserva
         reservationRepository.save(newReservation);
     }
 
     @Override
     public ReservationDTO get(String id) throws Exception {
         Optional<Reservation> reservationOptional = reservationRepository.findById(id);
-
         if (reservationOptional.isEmpty()) {
             throw new NotFoundException("La reserva con ID '" + id + "' no fue encontrada.");
         }
-
         return reservationMapper.toReservationDTO(reservationOptional.get());
     }
 
     @Override
     public void delete(String id) throws Exception {
         Optional<Reservation> reservationOptional = reservationRepository.findById(id);
-
         if (reservationOptional.isEmpty()) {
             throw new NotFoundException("La reserva con ID '" + id + "' no fue encontrada.");
         }
-
         reservationRepository.deleteById(id);
     }
 
@@ -147,40 +136,33 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public void edit(String id, EditReservationDTO reservationDTO) throws Exception {
         Optional<Reservation> reservationOptional = reservationRepository.findById(id);
-
         if (reservationOptional.isEmpty()) {
             throw new NotFoundException("La reserva con ID '" + id + "' no fue encontrada.");
         }
 
         Reservation reservation = reservationOptional.get();
 
-        // Validar que no esté cancelada
         if (reservation.getStatus() == ReservationStatus.CANCELLED) {
             throw new InvalidOperationException("No se puede editar una reserva cancelada.");
         }
 
-        // Validar que no haya iniciado
         if (reservation.getCheckInDate().isBefore(LocalDate.now())) {
             throw new InvalidOperationException("No se puede editar una reserva que ya ha iniciado.");
         }
 
-        // Validar fechas
         if (reservationDTO.checkInDate().isAfter(reservationDTO.checkOutDate())) {
             throw new InvalidOperationException("La fecha de entrada no puede ser posterior a la fecha de salida.");
         }
 
-        // Validar capacidad
         if (reservationDTO.numberOfGuests() > reservation.getAccommodation().getMaxCapacity()) {
             throw new InvalidOperationException("El número de huéspedes excede la capacidad máxima.");
         }
 
-        // Actualizar campos
         reservation.setCheckInDate(reservationDTO.checkInDate());
         reservation.setCheckOutDate(reservationDTO.checkOutDate());
         reservation.setNumberOfGuests(reservationDTO.numberOfGuests());
         reservation.setStatus(reservationDTO.status());
 
-        // Recalcular precio
         long nights = java.time.temporal.ChronoUnit.DAYS.between(
                 reservationDTO.checkInDate(),
                 reservationDTO.checkOutDate()
@@ -194,13 +176,11 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public void confirm(String id) throws Exception {
         Optional<Reservation> reservationOptional = reservationRepository.findById(id);
-
         if (reservationOptional.isEmpty()) {
             throw new NotFoundException("La reserva con ID '" + id + "' no fue encontrada.");
         }
 
         Reservation reservation = reservationOptional.get();
-
         if (reservation.getStatus() != ReservationStatus.PENDING) {
             throw new InvalidOperationException("Solo se pueden confirmar reservas en estado PENDING.");
         }
@@ -212,13 +192,11 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public void cancel(String id) throws Exception {
         Optional<Reservation> reservationOptional = reservationRepository.findById(id);
-
         if (reservationOptional.isEmpty()) {
             throw new NotFoundException("La reserva con ID '" + id + "' no fue encontrada.");
         }
 
         Reservation reservation = reservationOptional.get();
-
         if (reservation.getCheckInDate().isBefore(LocalDate.now())) {
             throw new InvalidOperationException("No se puede cancelar una reserva que ya ha iniciado.");
         }
@@ -240,5 +218,71 @@ public class ReservationServiceImpl implements ReservationService {
         );
 
         return overlappingReservations.isEmpty();
+    }
+
+    // ✅ EJERCICIO 3: Reportes de usuario con ordenamiento
+    @Override
+    public List<ReservationDTO> listByGuestSorted(String guestId, Sort sort) throws Exception {
+        if (userRepository.findById(guestId).isEmpty()) {
+            throw new NotFoundException("El huésped con ID '" + guestId + "' no fue encontrado.");
+        }
+
+        return reservationRepository.findByGuestId(guestId, sort)
+                .stream()
+                .map(reservationMapper::toReservationDTO)
+                .collect(Collectors.toList());
+    }
+
+    // ✅ EJERCICIO 5: Consultas personalizadas
+    @Override
+    public List<ReservationDTO> listByDateRange(LocalDate startDate, LocalDate endDate, Sort sort) {
+        return reservationRepository.findByDateRange(startDate, endDate, sort)
+                .stream()
+                .map(reservationMapper::toReservationDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ReservationDTO> listActiveReservationsByGuest(String guestId, Sort sort) throws Exception {
+        if (userRepository.findById(guestId).isEmpty()) {
+            throw new NotFoundException("El huésped con ID '" + guestId + "' no fue encontrado.");
+        }
+
+        return reservationRepository.findActiveReservationsByGuest(guestId, sort)
+                .stream()
+                .map(reservationMapper::toReservationDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ReservationDTO> listCompletedReservationsByGuest(String guestId, Sort sort) throws Exception {
+        if (userRepository.findById(guestId).isEmpty()) {
+            throw new NotFoundException("El huésped con ID '" + guestId + "' no fue encontrado.");
+        }
+
+        return reservationRepository.findCompletedReservationsByGuest(guestId, sort)
+                .stream()
+                .map(reservationMapper::toReservationDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ReservationDTO> listUpcomingReservations(Sort sort) {
+        return reservationRepository.findUpcomingReservations(LocalDate.now(), sort)
+                .stream()
+                .map(reservationMapper::toReservationDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ReservationDTO> listByAccommodationAndStatus(String accommodationId, ReservationStatus status, Sort sort) throws Exception {
+        if (accommodationRepository.findById(accommodationId).isEmpty()) {
+            throw new NotFoundException("El alojamiento con ID '" + accommodationId + "' no fue encontrado.");
+        }
+
+        return reservationRepository.findByAccommodationAndStatus(accommodationId, status, sort)
+                .stream()
+                .map(reservationMapper::toReservationDTO)
+                .collect(Collectors.toList());
     }
 }

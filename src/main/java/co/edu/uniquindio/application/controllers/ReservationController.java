@@ -8,6 +8,7 @@ import co.edu.uniquindio.application.models.enums.ReservationStatus;
 import co.edu.uniquindio.application.services.ReservationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -91,5 +92,98 @@ public class ReservationController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkOutDate) throws Exception {
         boolean available = reservationService.isAvailable(accommodationId, checkInDate, checkOutDate);
         return ResponseEntity.ok(new ResponseDTO<>(false, available));
+    }
+
+    // ✅ EJERCICIO 3: Reportes de usuario con ordenamiento
+    @GetMapping("/guest/{guestId}/sorted")
+    public ResponseEntity<ResponseDTO<List<ReservationDTO>>> listByGuestSorted(
+            @PathVariable String guestId,
+            @RequestParam(defaultValue = "checkInDate") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDir) throws Exception {
+        
+        Sort sort = sortDir.equalsIgnoreCase("DESC") ? 
+                    Sort.by(sortBy).descending() : 
+                    Sort.by(sortBy).ascending();
+        
+        List<ReservationDTO> list = reservationService.listByGuestSorted(guestId, sort);
+        return ResponseEntity.ok(new ResponseDTO<>(false, list));
+    }
+
+    // ✅ EJERCICIO 5: Consultas personalizadas
+
+    // 1. Buscar por rango de fechas con ordenamiento
+    @GetMapping("/by-date-range")
+    public ResponseEntity<ResponseDTO<List<ReservationDTO>>> listByDateRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "checkInDate") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDir) {
+        
+        Sort sort = sortDir.equalsIgnoreCase("DESC") ? 
+                    Sort.by(sortBy).descending() : 
+                    Sort.by(sortBy).ascending();
+        
+        List<ReservationDTO> list = reservationService.listByDateRange(startDate, endDate, sort);
+        return ResponseEntity.ok(new ResponseDTO<>(false, list));
+    }
+
+    // 2. Reservas activas de un usuario
+    @GetMapping("/guest/{guestId}/active")
+    public ResponseEntity<ResponseDTO<List<ReservationDTO>>> listActiveReservationsByGuest(
+            @PathVariable String guestId,
+            @RequestParam(defaultValue = "checkInDate") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDir) throws Exception {
+        
+        Sort sort = sortDir.equalsIgnoreCase("DESC") ? 
+                    Sort.by(sortBy).descending() : 
+                    Sort.by(sortBy).ascending();
+        
+        List<ReservationDTO> list = reservationService.listActiveReservationsByGuest(guestId, sort);
+        return ResponseEntity.ok(new ResponseDTO<>(false, list));
+    }
+
+    // 3. Reservas completadas de un usuario
+    @GetMapping("/guest/{guestId}/completed")
+    public ResponseEntity<ResponseDTO<List<ReservationDTO>>> listCompletedReservationsByGuest(
+            @PathVariable String guestId,
+            @RequestParam(defaultValue = "checkInDate") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDir) throws Exception {
+        
+        Sort sort = sortDir.equalsIgnoreCase("DESC") ? 
+                    Sort.by(sortBy).descending() : 
+                    Sort.by(sortBy).ascending();
+        
+        List<ReservationDTO> list = reservationService.listCompletedReservationsByGuest(guestId, sort);
+        return ResponseEntity.ok(new ResponseDTO<>(false, list));
+    }
+
+    // 4. Próximas reservas
+    @GetMapping("/upcoming")
+    public ResponseEntity<ResponseDTO<List<ReservationDTO>>> listUpcomingReservations(
+            @RequestParam(defaultValue = "checkInDate") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDir) {
+        
+        Sort sort = sortDir.equalsIgnoreCase("DESC") ? 
+                    Sort.by(sortBy).descending() : 
+                    Sort.by(sortBy).ascending();
+        
+        List<ReservationDTO> list = reservationService.listUpcomingReservations(sort);
+        return ResponseEntity.ok(new ResponseDTO<>(false, list));
+    }
+
+    // 5. Por alojamiento y estado con ordenamiento
+    @GetMapping("/accommodation/{accommodationId}/status/{status}")
+    public ResponseEntity<ResponseDTO<List<ReservationDTO>>> listByAccommodationAndStatus(
+            @PathVariable String accommodationId,
+            @PathVariable ReservationStatus status,
+            @RequestParam(defaultValue = "checkInDate") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDir) throws Exception {
+        
+        Sort sort = sortDir.equalsIgnoreCase("DESC") ? 
+                    Sort.by(sortBy).descending() : 
+                    Sort.by(sortBy).ascending();
+        
+        List<ReservationDTO> list = reservationService.listByAccommodationAndStatus(accommodationId, status, sort);
+        return ResponseEntity.ok(new ResponseDTO<>(false, list));
     }
 }

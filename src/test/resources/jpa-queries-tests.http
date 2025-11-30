@@ -1,0 +1,280 @@
+### ========================================
+### PRUEBAS DE CONSULTAS JPA
+### Ejercicios de la Guía del Profesor
+### ========================================
+
+### ✅ EJERCICIO 1: Consulta por ciudad con paginación
+### Buscar alojamientos en Bogotá - Primera página (10 resultados)
+GET http://localhost:8080/api/accommodations/by-city-paginated?city=Bogota&page=0&size=10&sortBy=pricePerNight&sortDir=ASC
+
+###
+
+### Segunda página
+GET http://localhost:8080/api/accommodations/by-city-paginated?city=Bogota&page=1&size=10&sortBy=title&sortDir=ASC
+
+###
+
+### Ordenar por rating descendente
+GET http://localhost:8080/api/accommodations/by-city-paginated?city=Medellin&page=0&size=5&sortBy=averageRating&sortDir=DESC
+
+###
+
+### ========================================
+
+### ✅ EJERCICIO 2: Autenticación de usuario
+### Autenticar con email y contraseña
+POST http://localhost:8080/api/users/authenticate?email=cristhian@email.com&password=Abc123456
+
+###
+
+### Caso de error: Contraseña incorrecta
+POST http://localhost:8080/api/users/authenticate?email=cristhian@email.com&password=WrongPassword123
+
+###
+
+### Caso de error: Usuario no existe
+POST http://localhost:8080/api/users/authenticate?email=noexiste@email.com&password=Any123
+
+###
+
+### ========================================
+
+### ✅ EJERCICIO 3: Reportes de usuario con ordenamiento
+### Reservas de un usuario ordenadas por fecha ASC (más antiguas primero)
+GET http://localhost:8080/api/reservations/guest/user-456/sorted?sortBy=checkInDate&sortDir=ASC
+
+###
+
+### Reservas ordenadas por fecha DESC (más recientes primero)
+GET http://localhost:8080/api/reservations/guest/user-456/sorted?sortBy=checkInDate&sortDir=DESC
+
+###
+
+### Ordenar por precio total descendente
+GET http://localhost:8080/api/reservations/guest/user-456/sorted?sortBy=totalPrice&sortDir=DESC
+
+###
+
+### Ordenar por fecha de creación
+GET http://localhost:8080/api/reservations/guest/user-456/sorted?sortBy=createdAt&sortDir=DESC
+
+###
+
+### ========================================
+
+### ✅ EJERCICIO 4: Búsqueda por texto con paginación
+### Buscar alojamientos que contengan "casa" en el título
+GET http://localhost:8080/api/accommodations/search?text=casa&page=0&size=10
+
+###
+
+### Buscar "apartamento" - ignora mayúsculas
+GET http://localhost:8080/api/accommodations/search?text=APARTAMENTO&page=0&size=5
+
+###
+
+### Buscar con texto parcial
+GET http://localhost:8080/api/accommodations/search?text=mod&page=0&size=10
+
+###
+
+### Segunda página de resultados
+GET http://localhost:8080/api/accommodations/search?text=casa&page=1&size=10
+
+###
+
+### ========================================
+
+### ✅ EJERCICIO 5: CONSULTAS PERSONALIZADAS
+
+### 📍 Consulta 1: Alojamientos activos por ciudad con precio máximo
+GET http://localhost:8080/api/accommodations/active-by-city-price?city=Bogota&maxPrice=200&page=0&size=10
+
+###
+
+### 📍 Consulta 2: Por capacidad y rating mínimo
+GET http://localhost:8080/api/accommodations/by-capacity-rating?minCapacity=4&minRating=4.0&page=0&size=10
+
+###
+
+### 📍 Consulta 3: Alojamientos más populares
+GET http://localhost:8080/api/accommodations/most-popular?page=0&size=10
+
+###
+
+### 📍 Consulta 4: Rango de precio con alojamientos activos
+GET http://localhost:8080/api/accommodations/by-price-range-active?minPrice=50&maxPrice=150&page=0&size=10
+
+###
+
+### 📍 Consulta 5: Cerca de una ubicación (Bogotá: 4.7110, -74.0721)
+### Radio de 10 km
+GET http://localhost:8080/api/accommodations/near-location?latitude=4.7110&longitude=-74.0721&radiusKm=10&page=0&size=10
+
+###
+
+### ========================================
+### CONSULTAS PERSONALIZADAS DE RESERVAS
+### ========================================
+
+### 📍 Consulta 6: Reservas por rango de fechas
+GET http://localhost:8080/api/reservations/by-date-range?startDate=2025-01-01&endDate=2025-12-31&sortBy=checkInDate&sortDir=ASC
+
+###
+
+### 📍 Consulta 7: Reservas activas de un usuario
+GET http://localhost:8080/api/reservations/guest/user-456/active?sortBy=checkInDate&sortDir=ASC
+
+###
+
+### 📍 Consulta 8: Reservas completadas de un usuario
+GET http://localhost:8080/api/reservations/guest/user-456/completed?sortBy=checkInDate&sortDir=DESC
+
+###
+
+### 📍 Consulta 9: Próximas reservas (futuras)
+GET http://localhost:8080/api/reservations/upcoming?sortBy=checkInDate&sortDir=ASC
+
+###
+
+### 📍 Consulta 10: Por alojamiento y estado
+GET http://localhost:8080/api/reservations/accommodation/acc-123/status/CONFIRMED?sortBy=checkInDate&sortDir=ASC
+
+###
+
+### ========================================
+### EJEMPLOS ADICIONALES CON DIFERENTES ORDENAMIENTOS
+### ========================================
+
+### Alojamientos por ciudad - Ordenar por capacidad
+GET http://localhost:8080/api/accommodations/by-city-paginated?city=Bogota&page=0&size=10&sortBy=maxCapacity&sortDir=DESC
+
+###
+
+### Alojamientos por ciudad - Ordenar por título alfabéticamente
+GET http://localhost:8080/api/accommodations/by-city-paginated?city=Medellin&page=0&size=10&sortBy=title&sortDir=ASC
+
+###
+
+### Reservas ordenadas por número de huéspedes
+GET http://localhost:8080/api/reservations/guest/user-456/sorted?sortBy=numberOfGuests&sortDir=DESC
+
+###
+
+### Reservas ordenadas por fecha de actualización
+GET http://localhost:8080/api/reservations/guest/user-456/sorted?sortBy=updatedAt&sortDir=DESC
+
+###
+
+### ========================================
+### CASOS DE PRUEBA COMPLETOS
+### ========================================
+
+### ESCENARIO 1: Buscar alojamiento, verificar disponibilidad y crear reserva
+
+### Paso 1: Buscar alojamientos en Medellín con precio máximo de $150
+GET http://localhost:8080/api/accommodations/active-by-city-price?city=Medellin&maxPrice=150&page=0&size=5
+
+###
+
+### Paso 2: Verificar disponibilidad del alojamiento
+GET http://localhost:8080/api/reservations/availability?accommodationId=acc-123&checkInDate=2025-12-20&checkOutDate=2025-12-25
+
+###
+
+### Paso 3: Crear la reserva
+POST http://localhost:8080/api/reservations
+Content-Type: application/json
+
+{
+  "accommodationId": "acc-123",
+  "guestId": "user-456",
+  "checkInDate": "2025-12-20",
+  "checkOutDate": "2025-12-25",
+  "numberOfGuests": 2
+}
+
+###
+
+### ESCENARIO 2: Usuario consulta su historial de reservas
+
+### Paso 1: Autenticarse
+POST http://localhost:8080/api/users/authenticate?email=juan@email.com&password=Password123
+
+###
+
+### Paso 2: Ver todas sus reservas ordenadas por fecha (más recientes primero)
+GET http://localhost:8080/api/reservations/guest/user-456/sorted?sortBy=checkInDate&sortDir=DESC
+
+###
+
+### Paso 3: Ver solo reservas activas
+GET http://localhost:8080/api/reservations/guest/user-456/active?sortBy=checkInDate&sortDir=ASC
+
+###
+
+### Paso 4: Ver historial de reservas completadas
+GET http://localhost:8080/api/reservations/guest/user-456/completed?sortBy=checkInDate&sortDir=DESC
+
+###
+
+### ========================================
+### PRUEBAS DE PAGINACIÓN
+### ========================================
+
+### Ver resultados totales de búsqueda
+GET http://localhost:8080/api/accommodations/search?text=casa&page=0&size=10
+
+### Respuesta esperada incluye:
+### {
+###   "error": false,
+###   "content": {
+###     "content": [...],           // Lista de resultados
+###     "totalElements": 25,        // Total de resultados
+###     "totalPages": 3,            // Total de páginas
+###     "number": 0,                // Página actual
+###     "size": 10,                 // Resultados por página
+###     "first": true,              // Es la primera página
+###     "last": false               // No es la última página
+###   }
+### }
+
+###
+
+### Navegar por páginas
+GET http://localhost:8080/api/accommodations/search?text=casa&page=1&size=10
+
+###
+
+GET http://localhost:8080/api/accommodations/search?text=casa&page=2&size=10
+
+###
+
+### ========================================
+### CASOS DE ERROR
+### ========================================
+
+### Error: Ciudad no encontrada o sin resultados
+GET http://localhost:8080/api/accommodations/by-city-paginated?city=CiudadInexistente&page=0&size=10
+
+###
+
+### Error: Página fuera de rango
+GET http://localhost:8080/api/accommodations/search?text=casa&page=999&size=10
+
+###
+
+### Error: Parámetros inválidos
+GET http://localhost:8080/api/accommodations/by-capacity-rating?minCapacity=-5&minRating=10&page=0&size=10
+
+###
+
+### Error: Usuario no encontrado para autenticación
+POST http://localhost:8080/api/users/authenticate?email=noexiste@email.com&password=Any123
+
+###
+
+### Error: Ordenamiento por campo inexistente
+GET http://localhost:8080/api/reservations/guest/user-456/sorted?sortBy=campoInexistente&sortDir=ASC
+
+###

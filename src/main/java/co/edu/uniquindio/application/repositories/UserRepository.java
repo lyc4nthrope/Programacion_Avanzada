@@ -12,7 +12,8 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, String> {
 
     /**
-     * Busca un usuario por email
+     * ✅ EJERCICIO 2: Autenticación de usuario
+     * Busca un usuario por email (usaremos esto junto con verificación de contraseña en el servicio)
      */
     Optional<User> findByEmail(String email);
 

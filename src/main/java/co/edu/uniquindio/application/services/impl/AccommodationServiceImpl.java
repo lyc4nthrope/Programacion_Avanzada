@@ -13,6 +13,8 @@ import co.edu.uniquindio.application.repositories.AccommodationRepository;
 import co.edu.uniquindio.application.repositories.UserRepository;
 import co.edu.uniquindio.application.services.AccommodationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,51 +31,36 @@ public class AccommodationServiceImpl implements AccommodationService {
 
     @Override
     public void create(CreateAccommodationDTO accommodationDTO, String hostId) throws Exception {
-        // Validar que el host existe
         Optional<User> host = userRepository.findById(hostId);
         if (host.isEmpty()) {
             throw new NotFoundException("El usuario anfitrión con ID '" + hostId + "' no fue encontrado.");
         }
 
-        // Transformación del DTO a Accommodation
         Accommodation newAccommodation = accommodationMapper.toEntity(accommodationDTO);
         newAccommodation.setHost(host.get());
-
-        // Almacenamiento
         accommodationRepository.save(newAccommodation);
     }
 
     @Override
     public AccommodationDTO get(String id) throws Exception {
-        // Recuperación del alojamiento
         Optional<Accommodation> accommodationOptional = accommodationRepository.findById(id);
-
-        // Si el alojamiento no existe, lanzar una excepción
         if (accommodationOptional.isEmpty()) {
             throw new NotFoundException("El alojamiento con ID '" + id + "' no fue encontrado.");
         }
-
-        // Transformación del alojamiento a DTO
         return accommodationMapper.toAccommodationDTO(accommodationOptional.get());
     }
 
     @Override
     public void delete(String id) throws Exception {
-        // Recuperación del alojamiento
         Optional<Accommodation> accommodationOptional = accommodationRepository.findById(id);
-
-        // Si el alojamiento no existe, lanzar una excepción
         if (accommodationOptional.isEmpty()) {
             throw new NotFoundException("El alojamiento con ID '" + id + "' no fue encontrado.");
         }
-
-        // Eliminación física del alojamiento
         accommodationRepository.deleteById(id);
     }
 
     @Override
     public List<AccommodationDTO> listAll() {
-        // Obtener todos los alojamientos y convertirlos a DTOs
         return accommodationRepository.findAll()
                 .stream()
                 .map(accommodationMapper::toAccommodationDTO)
@@ -82,7 +69,6 @@ public class AccommodationServiceImpl implements AccommodationService {
 
     @Override
     public List<AccommodationDTO> listByCity(String city) throws Exception {
-        // Filtrar por ciudad
         return accommodationRepository.findByCity(city)
                 .stream()
                 .map(accommodationMapper::toAccommodationDTO)
@@ -91,7 +77,6 @@ public class AccommodationServiceImpl implements AccommodationService {
 
     @Override
     public List<AccommodationDTO> listByPriceRange(Double minPrice, Double maxPrice) throws Exception {
-        // Filtrar por rango de precio
         return accommodationRepository.findByPricePerNightBetween(minPrice, maxPrice)
                 .stream()
                 .map(accommodationMapper::toAccommodationDTO)
@@ -100,18 +85,12 @@ public class AccommodationServiceImpl implements AccommodationService {
 
     @Override
     public void edit(String id, EditAccommodationDTO accommodationDTO) throws Exception {
-        // Recuperación del alojamiento
         Optional<Accommodation> accommodationOptional = accommodationRepository.findById(id);
-
-        // Si el alojamiento no existe, lanzar una excepción
         if (accommodationOptional.isEmpty()) {
             throw new NotFoundException("El alojamiento con ID '" + id + "' no fue encontrado.");
         }
 
-        // Se obtiene el alojamiento que está dentro del Optional
         Accommodation accommodation = accommodationOptional.get();
-
-        // Actualización de los campos del alojamiento
         accommodation.setTitle(accommodationDTO.title());
         accommodation.setDescription(accommodationDTO.description());
         accommodation.setCity(accommodationDTO.city());
@@ -121,12 +100,8 @@ public class AccommodationServiceImpl implements AccommodationService {
         accommodation.setPricePerNight(accommodationDTO.pricePerNight());
         accommodation.setMaxCapacity(accommodationDTO.maxCapacity());
         accommodation.setAmenities(accommodationDTO.amenities());
-
-        // Almacenamiento del alojamiento actualizado
         accommodationRepository.save(accommodation);
     }
-
-    // ✅ NUEVOS MÉTODOS PARA GESTIONAR STATUS
 
     @Override
     public void activate(String id) throws Exception {
@@ -158,16 +133,12 @@ public class AccommodationServiceImpl implements AccommodationService {
 
     @Override
     public void changeStatus(String id, AccommodationStatus newStatus) throws Exception {
-        // Validar que el alojamiento existe
         Optional<Accommodation> accommodationOptional = accommodationRepository.findById(id);
-
         if (accommodationOptional.isEmpty()) {
             throw new NotFoundException("El alojamiento con ID '" + id + "' no fue encontrado.");
         }
 
         Accommodation accommodation = accommodationOptional.get();
-
-        // Validar que no se intente activar un alojamiento eliminado
         if (accommodation.getStatus() == AccommodationStatus.DELETED && 
             newStatus == AccommodationStatus.ACTIVE) {
             throw new InvalidOperationException(
@@ -175,8 +146,54 @@ public class AccommodationServiceImpl implements AccommodationService {
             );
         }
 
-        // Cambiar el estado
         accommodation.setStatus(newStatus);
         accommodationRepository.save(accommodation);
+    }
+
+    // ✅ EJERCICIO 1: Consulta por ciudad con paginación
+    @Override
+    public Page<AccommodationDTO> listByCityPaginated(String city, Pageable pageable) throws Exception {
+        Page<Accommodation> page = accommodationRepository.findByCity(city, pageable);
+        return page.map(accommodationMapper::toAccommodationDTO);
+    }
+
+    // ✅ EJERCICIO 4: Búsqueda por texto con paginación
+    @Override
+    public Page<AccommodationDTO> searchByNamePaginated(String text, Pageable pageable) throws Exception {
+        Page<Accommodation> page = accommodationRepository.findByTitleContainingIgnoreCase(text, pageable);
+        return page.map(accommodationMapper::toAccommodationDTO);
+    }
+
+    // ✅ EJERCICIO 5: Consultas personalizadas
+    @Override
+    public Page<AccommodationDTO> findActiveByCityAndMaxPrice(String city, Double maxPrice, Pageable pageable) {
+        Page<Accommodation> page = accommodationRepository.findActiveByCityAndMaxPrice(city, maxPrice, pageable);
+        return page.map(accommodationMapper::toAccommodationDTO);
+    }
+
+    @Override
+    public Page<AccommodationDTO> findByCapacityAndRating(Integer minCapacity, Double minRating, Pageable pageable) {
+        Page<Accommodation> page = accommodationRepository.findByCapacityAndRating(minCapacity, minRating, pageable);
+        return page.map(accommodationMapper::toAccommodationDTO);
+    }
+
+    @Override
+    public Page<AccommodationDTO> findMostPopular(Pageable pageable) {
+        Page<Accommodation> page = accommodationRepository.findMostPopular(pageable);
+        return page.map(accommodationMapper::toAccommodationDTO);
+    }
+
+    @Override
+    public Page<AccommodationDTO> findByPriceRangeActive(Double minPrice, Double maxPrice, Pageable pageable) {
+        Page<Accommodation> page = accommodationRepository.findByPriceRangeActive(minPrice, maxPrice, pageable);
+        return page.map(accommodationMapper::toAccommodationDTO);
+    }
+
+    @Override
+    public Page<AccommodationDTO> findNearLocation(Double latitude, Double longitude, Double radiusKm, Pageable pageable) {
+        // Convertir km a grados aproximados (1 grado ≈ 111 km)
+        Double radiusDegrees = radiusKm / 111.0;
+        Page<Accommodation> page = accommodationRepository.findNearLocation(latitude, longitude, radiusDegrees, pageable);
+        return page.map(accommodationMapper::toAccommodationDTO);
     }
 }
