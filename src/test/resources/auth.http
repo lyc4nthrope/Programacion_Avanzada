@@ -1,0 +1,212 @@
+### ========================================
+### AUTENTICACIÓN CON JWT
+### ========================================
+
+### 1. Registrar un nuevo usuario
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Usuario Prueba JWT",
+  "phone": "3001234567",
+  "email": "pruebajwt@test.com",
+  "password": "Password123",
+  "photoUrl": "",
+  "dateBirth": "1995-05-15",
+  "role": "GUEST"
+}
+
+###
+
+### 2. Hacer login (obtener token)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "pruebajwt@test.com",
+  "password": "Password123"
+}
+
+> {% client.global.set("auth_token", response.body.content.token); %}
+
+### Respuesta esperada:
+# {
+#   "error": false,
+#   "content": {
+#     "token": "eyJhbGciOiJIUzI1NiJ9..."
+#   }
+# }
+
+###
+
+### 3. Probar endpoint protegido (requiere token)
+GET http://localhost:8080/api/auth/test
+Authorization: Bearer {{auth_token}}
+
+###
+
+### 4. Obtener todos los usuarios (requiere token)
+GET http://localhost:8080/api/users
+Authorization: Bearer {{auth_token}}
+
+###
+
+### 5. Crear un alojamiento (requiere token)
+POST http://localhost:8080/api/accommodations
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "title": "Casa en Bogotá",
+  "description": "Hermosa casa con vista a la ciudad",
+  "city": "Bogota",
+  "address": "Calle 50 #10-20",
+  "latitude": 4.7110,
+  "longitude": -74.0721,
+  "pricePerNight": 150.00,
+  "maxCapacity": 5,
+  "amenities": "WiFi, Cocina, Piscina"
+}
+
+###
+
+### ========================================
+### CASOS DE ERROR
+### ========================================
+
+### Error 1: Login con email inexistente
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "noexiste@test.com",
+  "password": "Password123"
+}
+
+###
+
+### Error 2: Login con contraseña incorrecta
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "pruebajwt@test.com",
+  "password": "WrongPassword"
+}
+
+###
+
+### Error 3: Intentar acceder a endpoint protegido SIN token
+GET http://localhost:8080/api/users
+
+### Respuesta esperada:
+# {
+#   "error": true,
+#   "content": "No tienes permisos para acceder a este recurso"
+# }
+
+###
+
+### Error 4: Intentar acceder con token inválido
+GET http://localhost:8080/api/users
+Authorization: Bearer token_invalido_123
+
+###
+
+### Error 5: Registrar usuario con email duplicado
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Otro Usuario",
+  "phone": "3009876543",
+  "email": "pruebajwt@test.com",
+  "password": "Password123",
+  "photoUrl": "",
+  "dateBirth": "1992-03-10",
+  "role": "GUEST"
+}
+
+###
+
+### ========================================
+### FLUJO COMPLETO
+### ========================================
+
+### Paso 1: Registrar usuario
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Juan Pérez",
+  "phone": "3001112233",
+  "email": "juan@test.com",
+  "password": "Secure123",
+  "photoUrl": "",
+  "dateBirth": "1990-01-01",
+  "role": "HOST"
+}
+
+###
+
+### Paso 2: Login
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "juan@test.com",
+  "password": "Secure123"
+}
+
+> {% client.global.set("auth_token", response.body.content.token); %}
+
+###
+
+### Paso 3: Usar el token para crear un perfil de anfitrión
+POST http://localhost:8080/api/host-profiles
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "userId": "USER_ID_AQUI",
+  "aboutMe": "Soy un anfitrión experimentado con 5 años de experiencia.",
+  "legalDocument": "Doc-123-ABC"
+}
+
+###
+
+### Paso 4: Crear un alojamiento
+POST http://localhost:8080/api/accommodations
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "title": "Apartamento Moderno",
+  "description": "Hermoso apartamento en el centro de la ciudad",
+  "city": "Medellin",
+  "address": "Carrera 43A #10-20",
+  "latitude": 6.2442,
+  "longitude": -75.5812,
+  "pricePerNight": 120.00,
+  "maxCapacity": 4,
+  "amenities": "WiFi, Cocina, Lavadora"
+}
+
+###
+
+### ========================================
+### DECODIFICAR TOKEN JWT
+### ========================================
+### Visita: https://jwt.io
+### Copia el token de la respuesta de login
+### Pégalo en el campo "Encoded" para ver su contenido
+###
+### Ejemplo de contenido decodificado:
+### {
+###   "email": "pruebajwt@test.com",
+###   "name": "Usuario Prueba JWT",
+###   "role": "ROLE_GUEST",
+###   "sub": "usuario-id-123",
+###   "iat": 1234567890,
+###   "exp": 1234571490
+### }
