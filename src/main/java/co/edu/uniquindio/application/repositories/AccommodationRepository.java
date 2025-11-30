@@ -15,17 +15,17 @@ import java.util.Optional;
 @Repository
 public interface AccommodationRepository extends JpaRepository<Accommodation, String> {
 
-    // ✅ EJERCICIO 1: Consulta por ciudad con paginación
-    Page<Accommodation> findByCity(String city, Pageable pageable);
-
-    // ✅ EJERCICIO 4: Búsqueda por texto con paginación (nombre contiene texto, ignore case)
-    Page<Accommodation> findByTitleContainingIgnoreCase(String text, Pageable pageable);
-
-    // Consultas básicas necesarias (usadas en AccommodationServiceImpl)
+    // ✅ Consultas básicas SIN paginación
     Optional<Accommodation> findByTitle(String title);
     List<Accommodation> findByStatusEquals(AccommodationStatus status);
 
-    // ✅ EJERCICIO 5: Consultas personalizadas adicionales
+    // ✅ Consultas CON paginación
+    Page<Accommodation> findByCity(String city, Pageable pageable);
+    Page<Accommodation> findByTitleContainingIgnoreCase(String text, Pageable pageable);
+    Page<Accommodation> findByStatusEquals(AccommodationStatus status, Pageable pageable);
+    Page<Accommodation> findByPricePerNightBetween(Double minPrice, Double maxPrice, Pageable pageable);
+
+    // ✅ EJERCICIO 5: Consultas personalizadas
 
     // 1. Buscar alojamientos activos por ciudad con precio menor o igual
     @Query("SELECT a FROM Accommodation a WHERE a.city = :city AND a.pricePerNight <= :maxPrice AND a.status = 'ACTIVE'")

@@ -50,6 +50,7 @@ public class AccommodationController {
         return ResponseEntity.ok(new ResponseDTO<>(false, accommodationDTO));
     }
 
+    // ✅ ENDPOINT SIN PAGINACIÓN (lista simple)
     @GetMapping
     public ResponseEntity<ResponseDTO<List<AccommodationDTO>>> listAll(
             @RequestParam(required = false) String city,
@@ -70,6 +71,39 @@ public class AccommodationController {
         }
 
         return ResponseEntity.ok(new ResponseDTO<>(false, list));
+    }
+
+    // ✅ NUEVO: ENDPOINT CON PAGINACIÓN (para consultas grandes)
+    @GetMapping("/paginated")
+    public ResponseEntity<ResponseDTO<Page<AccommodationDTO>>> listAllPaginated(
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) AccommodationStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "title") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDir
+    ) throws Exception {
+        
+        Sort sort = sortDir.equalsIgnoreCase("DESC") ? 
+                    Sort.by(sortBy).descending() : 
+                    Sort.by(sortBy).ascending();
+        
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<AccommodationDTO> resultPage;
+
+        if (status != null) {
+            resultPage = accommodationService.listByStatusPaginated(status, pageable);
+        } else if (city != null && !city.isEmpty()) {
+            resultPage = accommodationService.listByCityPaginated(city, pageable);
+        } else if (minPrice != null && maxPrice != null) {
+            resultPage = accommodationService.listByPriceRangePaginated(minPrice, maxPrice, pageable);
+        } else {
+            resultPage = accommodationService.listAllPaginated(pageable);
+        }
+
+        return ResponseEntity.ok(new ResponseDTO<>(false, resultPage));
     }
 
     @GetMapping("/active")
@@ -138,7 +172,6 @@ public class AccommodationController {
 
     // ✅ EJERCICIO 5: Consultas personalizadas
 
-    // 1. Buscar activos por ciudad con precio máximo
     @GetMapping("/active-by-city-price")
     public ResponseEntity<ResponseDTO<Page<AccommodationDTO>>> findActiveByCityAndMaxPrice(
             @RequestParam String city,
@@ -152,7 +185,6 @@ public class AccommodationController {
         return ResponseEntity.ok(new ResponseDTO<>(false, resultPage));
     }
 
-    // 2. Buscar por capacidad y rating mínimo
     @GetMapping("/by-capacity-rating")
     public ResponseEntity<ResponseDTO<Page<AccommodationDTO>>> findByCapacityAndRating(
             @RequestParam Integer minCapacity,
@@ -166,7 +198,6 @@ public class AccommodationController {
         return ResponseEntity.ok(new ResponseDTO<>(false, resultPage));
     }
 
-    // 3. Buscar más populares
     @GetMapping("/most-popular")
     public ResponseEntity<ResponseDTO<Page<AccommodationDTO>>> findMostPopular(
             @RequestParam(defaultValue = "0") int page,
@@ -178,7 +209,6 @@ public class AccommodationController {
         return ResponseEntity.ok(new ResponseDTO<>(false, resultPage));
     }
 
-    // 4. Buscar por rango de precio activos
     @GetMapping("/by-price-range-active")
     public ResponseEntity<ResponseDTO<Page<AccommodationDTO>>> findByPriceRangeActive(
             @RequestParam Double minPrice,
@@ -192,7 +222,6 @@ public class AccommodationController {
         return ResponseEntity.ok(new ResponseDTO<>(false, resultPage));
     }
 
-    // 5. Buscar cerca de una ubicación
     @GetMapping("/near-location")
     public ResponseEntity<ResponseDTO<Page<AccommodationDTO>>> findNearLocation(
             @RequestParam Double latitude,

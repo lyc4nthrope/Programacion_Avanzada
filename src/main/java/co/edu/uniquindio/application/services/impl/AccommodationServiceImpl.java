@@ -29,6 +29,10 @@ public class AccommodationServiceImpl implements AccommodationService {
     private final AccommodationMapper accommodationMapper;
     private final UserRepository userRepository;
 
+    // ========================================
+    // OPERACIONES CRUD BÁSICAS
+    // ========================================
+
     @Override
     public void create(CreateAccommodationDTO accommodationDTO, String hostId) throws Exception {
         Optional<User> host = userRepository.findById(hostId);
@@ -48,23 +52,6 @@ public class AccommodationServiceImpl implements AccommodationService {
             throw new NotFoundException("El alojamiento con ID '" + id + "' no fue encontrado.");
         }
         return accommodationMapper.toAccommodationDTO(accommodationOptional.get());
-    }
-
-    @Override
-    public void delete(String id) throws Exception {
-        Optional<Accommodation> accommodationOptional = accommodationRepository.findById(id);
-        if (accommodationOptional.isEmpty()) {
-            throw new NotFoundException("El alojamiento con ID '" + id + "' no fue encontrado.");
-        }
-        accommodationRepository.deleteById(id);
-    }
-
-    @Override
-    public List<AccommodationDTO> listAll() {
-        return accommodationRepository.findAll()
-                .stream()
-                .map(accommodationMapper::toAccommodationDTO)
-                .collect(Collectors.toList());
     }
 
     @Override
@@ -88,6 +75,19 @@ public class AccommodationServiceImpl implements AccommodationService {
     }
 
     @Override
+    public void delete(String id) throws Exception {
+        Optional<Accommodation> accommodationOptional = accommodationRepository.findById(id);
+        if (accommodationOptional.isEmpty()) {
+            throw new NotFoundException("El alojamiento con ID '" + id + "' no fue encontrado.");
+        }
+        accommodationRepository.deleteById(id);
+    }
+
+    // ========================================
+    // GESTIÓN DE ESTADO
+    // ========================================
+
+    @Override
     public void activate(String id) throws Exception {
         changeStatus(id, AccommodationStatus.ACTIVE);
     }
@@ -103,8 +103,33 @@ public class AccommodationServiceImpl implements AccommodationService {
     }
 
     @Override
-    public List<AccommodationDTO> listByStatus(AccommodationStatus status) {
-        return accommodationRepository.findByStatusEquals(status)
+    public void changeStatus(String id, AccommodationStatus newStatus) throws Exception {
+        Optional<Accommodation> accommodationOptional = accommodationRepository.findById(id);
+        if (accommodationOptional.isEmpty()) {
+            throw new NotFoundException("El alojamiento con ID '" + id + "' no fue encontrado.");
+        }
+
+        Accommodation accommodation = accommodationOptional.get();
+
+        // Validar que no se active un alojamiento eliminado
+        if (accommodation.getStatus() == AccommodationStatus.DELETED &&
+                newStatus == AccommodationStatus.ACTIVE) {
+            throw new InvalidOperationException(
+                    "No se puede activar un alojamiento eliminado. Debe crearse uno nuevo."
+            );
+        }
+
+        accommodation.setStatus(newStatus);
+        accommodationRepository.save(accommodation);
+    }
+
+    // ========================================
+    // CONSULTAS SIN PAGINACIÓN (LISTAS SIMPLES)
+    // ========================================
+
+    @Override
+    public List<AccommodationDTO> listAll() {
+        return accommodationRepository.findAll()
                 .stream()
                 .map(accommodationMapper::toAccommodationDTO)
                 .collect(Collectors.toList());
@@ -116,39 +141,73 @@ public class AccommodationServiceImpl implements AccommodationService {
     }
 
     @Override
-    public void changeStatus(String id, AccommodationStatus newStatus) throws Exception {
-        Optional<Accommodation> accommodationOptional = accommodationRepository.findById(id);
-        if (accommodationOptional.isEmpty()) {
-            throw new NotFoundException("El alojamiento con ID '" + id + "' no fue encontrado.");
-        }
-
-        Accommodation accommodation = accommodationOptional.get();
-        if (accommodation.getStatus() == AccommodationStatus.DELETED && 
-            newStatus == AccommodationStatus.ACTIVE) {
-            throw new InvalidOperationException(
-                "No se puede activar un alojamiento eliminado. Debe crearse uno nuevo."
-            );
-        }
-
-        accommodation.setStatus(newStatus);
-        accommodationRepository.save(accommodation);
+    public List<AccommodationDTO> listByStatus(AccommodationStatus status) {
+        return accommodationRepository.findByStatusEquals(status)
+                .stream()
+                .map(accommodationMapper::toAccommodationDTO)
+                .collect(Collectors.toList());
     }
 
-    // ✅ EJERCICIO 1: Consulta por ciudad con paginación
+    @Override
+    public List<AccommodationDTO> listByCity(String city) {
+        Page<Accommodation> page = accommodationRepository.findByCity(city, Pageable.unpaged());
+        return page.getContent()
+                .stream()
+                .map(accommodationMapper::toAccommodationDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<AccommodationDTO> listByPriceRange(Double minPrice, Double maxPrice) {
+        Page<Accommodation> page = accommodationRepository.findByPricePerNightBetween(minPrice, maxPrice, Pageable.unpaged());
+        return page.getContent()
+                .stream()
+                .map(accommodationMapper::toAccommodationDTO)
+                .collect(Collectors.toList());
+    }
+
+    // ========================================
+    // CONSULTAS CON PAGINACIÓN
+    // ========================================
+
+    @Override
+    public Page<AccommodationDTO> listAllPaginated(Pageable pageable) {
+        Page<Accommodation> page = accommodationRepository.findAll(pageable);
+        return page.map(accommodationMapper::toAccommodationDTO);
+    }
+
+    @Override
+    public Page<AccommodationDTO> listByStatusPaginated(AccommodationStatus status, Pageable pageable) {
+        Page<Accommodation> page = accommodationRepository.findByStatusEquals(status, pageable);
+        return page.map(accommodationMapper::toAccommodationDTO);
+    }
+
     @Override
     public Page<AccommodationDTO> listByCityPaginated(String city, Pageable pageable) throws Exception {
         Page<Accommodation> page = accommodationRepository.findByCity(city, pageable);
         return page.map(accommodationMapper::toAccommodationDTO);
     }
 
-    // ✅ EJERCICIO 4: Búsqueda por texto con paginación
+    @Override
+    public Page<AccommodationDTO> listByPriceRangePaginated(Double minPrice, Double maxPrice, Pageable pageable) {
+        Page<Accommodation> page = accommodationRepository.findByPricePerNightBetween(minPrice, maxPrice, pageable);
+        return page.map(accommodationMapper::toAccommodationDTO);
+    }
+
+    // ========================================
+    // EJERCICIO 4: BÚSQUEDA POR TEXTO
+    // ========================================
+
     @Override
     public Page<AccommodationDTO> searchByNamePaginated(String text, Pageable pageable) throws Exception {
         Page<Accommodation> page = accommodationRepository.findByTitleContainingIgnoreCase(text, pageable);
         return page.map(accommodationMapper::toAccommodationDTO);
     }
 
-    // ✅ EJERCICIO 5: Consultas personalizadas
+    // ========================================
+    // EJERCICIO 5: CONSULTAS PERSONALIZADAS
+    // ========================================
+
     @Override
     public Page<AccommodationDTO> findActiveByCityAndMaxPrice(String city, Double maxPrice, Pageable pageable) {
         Page<Accommodation> page = accommodationRepository.findActiveByCityAndMaxPrice(city, maxPrice, pageable);
