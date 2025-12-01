@@ -6,6 +6,7 @@ import co.edu.uniquindio.application.dto.edit.EditAccommodationDTO;
 import co.edu.uniquindio.application.dto.ResponseDTO;
 import co.edu.uniquindio.application.models.enums.AccommodationStatus;
 import co.edu.uniquindio.application.services.AccommodationService;
+import co.edu.uniquindio.application.services.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,12 +25,18 @@ import java.util.List;
 public class AccommodationController {
 
     private final AccommodationService accommodationService;
+    private final AuthService authService;
 
     @PostMapping
-    public ResponseEntity<ResponseDTO<String>> create(@Valid @RequestBody CreateAccommodationDTO accommodationDTO) throws Exception {
-        String hostId = "host-1";
-        accommodationService.create(accommodationDTO, hostId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDTO<>(false, "El alojamiento ha sido creado exitosamente"));
+    public ResponseEntity<ResponseDTO<String>> create(
+            @Valid @RequestBody CreateAccommodationDTO accommodationDTO) throws Exception {
+
+        // Obtener el ID del usuario autenticado
+        String authenticatedUserId = authService.getAuthenticatedUserId();
+
+        accommodationService.create(accommodationDTO, authenticatedUserId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ResponseDTO<>(false, "El alojamiento ha sido creado exitosamente"));
     }
 
     @PutMapping("/{id}")

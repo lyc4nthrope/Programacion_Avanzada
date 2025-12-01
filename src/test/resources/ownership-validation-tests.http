@@ -1,0 +1,84 @@
+### ========================================
+### PRUEBAS DE VALIDACIÓN DE PROPIETARIO
+### ========================================
+
+### 1. Login como HOST propietario
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "host1@test.com",
+  "password": "Host123"
+}
+
+> {% client.global.set("host1_token", response.body.content.token); %}
+
+###
+
+### 2. Login como HOST diferente
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "host2@test.com",
+  "password": "Host123"
+}
+
+> {% client.global.set("host2_token", response.body.content.token); %}
+
+###
+
+### 3. HOST1 crea un alojamiento
+POST http://localhost:8080/api/accommodations
+Content-Type: application/json
+Authorization: Bearer {{host1_token}}
+
+{
+  "title": "Casa de HOST1",
+  "description": "Mi casa",
+  "city": "Bogota",
+  "address": "Calle 50 #10-20",
+  "latitude": 4.7110,
+  "longitude": -74.0721,
+  "pricePerNight": 150.00,
+  "maxCapacity": 5,
+  "amenities": "WiFi"
+}
+
+###
+
+### 4. ✅ HOST1 puede desactivar SU alojamiento
+PUT http://localhost:8080/api/accommodations/{{accommodationId}}/deactivate
+Authorization: Bearer {{host1_token}}
+
+###
+
+### 5. ❌ HOST2 NO puede desactivar el alojamiento de HOST1 (debe fallar)
+PUT http://localhost:8080/api/accommodations/{{accommodationId}}/deactivate
+Authorization: Bearer {{host2_token}}
+
+### Respuesta esperada:
+# {
+#   "error": true,
+#   "content": "Solo puedes modificar el estado de tus propios alojamientos. Este alojamiento pertenece a otro anfitrión."
+# }
+
+###
+
+### 6. ❌ HOST2 NO puede activar el alojamiento de HOST1 (debe fallar)
+PUT http://localhost:8080/api/accommodations/{{accommodationId}}/activate
+Authorization: Bearer {{host2_token}}
+
+###
+
+### 7. ❌ HOST2 NO puede hacer soft delete del alojamiento de HOST1
+DELETE http://localhost:8080/api/accommodations/{{accommodationId}}/soft
+Authorization: Bearer {{host2_token}}
+
+###
+
+### 8. ✅ HOST1 SÍ puede hacer soft delete de SU alojamiento
+DELETE http://localhost:8080/api/accommodations/{{accommodationId}}/soft
+Authorization: Bearer {{host1_token}}
+
+###

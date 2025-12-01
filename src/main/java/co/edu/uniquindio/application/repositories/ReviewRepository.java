@@ -2,6 +2,8 @@ package co.edu.uniquindio.application.repositories;
 
 import co.edu.uniquindio.application.models.entitys.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,4 +22,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     // Contar reviews por alojamiento
     Long countByAccommodationId(String accommodationId);
+
+    @Query("SELECT r FROM Review r WHERE r.accommodation.id = :accommodationId ORDER BY r.createdAt DESC")
+    List<Review> findByAccommodationIdOrderByCreatedAtDesc(@Param("accommodationId") String accommodationId);
+
+    @Query("SELECT r FROM Review r WHERE r.user.id = :userId ORDER BY r.createdAt DESC")
+    List<Review> findByUserIdOrderByCreatedAtDesc(@Param("userId") String userId);
 }

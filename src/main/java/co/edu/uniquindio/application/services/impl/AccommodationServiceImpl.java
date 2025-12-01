@@ -33,8 +33,63 @@ public class AccommodationServiceImpl implements AccommodationService {
     private final AuthService authService;
 
     // ========================================
-    // OPERACIONES CRUD BÁSICAS
+    // GESTIÓN DE ESTADO - CON VALIDACIONES DE PROPIETARIO
     // ========================================
+
+    @Override
+    public void activate(String id) throws Exception {
+        validateOwnershipAndChangeStatus(id, AccommodationStatus.ACTIVE);
+    }
+
+    @Override
+    public void deactivate(String id) throws Exception {
+        validateOwnershipAndChangeStatus(id, AccommodationStatus.INACTIVE);
+    }
+
+    @Override
+    public void softDelete(String id) throws Exception {
+        validateOwnershipAndChangeStatus(id, AccommodationStatus.DELETED);
+    }
+
+    @Override
+    public void changeStatus(String id, AccommodationStatus newStatus) throws Exception {
+        validateOwnershipAndChangeStatus(id, newStatus);
+    }
+
+    private void validateOwnershipAndChangeStatus(String id, AccommodationStatus newStatus)
+            throws Exception {
+
+        // OBTENER USUARIO AUTENTICADO
+        String authenticatedUserId = authService.getAuthenticatedUserId();
+
+        // Recuperar el alojamiento
+        Optional<Accommodation> accommodationOptional = accommodationRepository.findById(id);
+        if (accommodationOptional.isEmpty()) {
+            throw new NotFoundException("El alojamiento con ID '" + id + "' no fue encontrado.");
+        }
+
+        Accommodation accommodation = accommodationOptional.get();
+
+        // VALIDAR: Solo el propietario puede cambiar el estado de su alojamiento
+        if (!accommodation.getHost().getId().equals(authenticatedUserId)) {
+            throw new InvalidOperationException(
+                    "Solo puedes modificar el estado de tus propios alojamientos. " +
+                            "Este alojamiento pertenece a otro anfitrión."
+            );
+        }
+
+        // Validar que no se active un alojamiento eliminado
+        if (accommodation.getStatus() == AccommodationStatus.DELETED &&
+                newStatus == AccommodationStatus.ACTIVE) {
+            throw new InvalidOperationException(
+                    "No se puede activar un alojamiento eliminado. Debe crearse uno nuevo."
+            );
+        }
+
+        // Cambiar el estado
+        accommodation.setStatus(newStatus);
+        accommodationRepository.save(accommodation);
+    }
 
     @Override
     public void create(CreateAccommodationDTO accommodationDTO, String hostId) throws Exception {
@@ -77,7 +132,6 @@ public class AccommodationServiceImpl implements AccommodationService {
 
     @Override
     public void edit(String id, EditAccommodationDTO accommodationDTO) throws Exception {
-
         // OBTENER USUARIO AUTENTICADO
         String authenticatedUserId = authService.getAuthenticatedUserId();
 
@@ -128,46 +182,6 @@ public class AccommodationServiceImpl implements AccommodationService {
         }
 
         accommodationRepository.deleteById(id);
-    }
-
-    // ========================================
-    // GESTIÓN DE ESTADO
-    // ========================================
-
-    @Override
-    public void activate(String id) throws Exception {
-        changeStatus(id, AccommodationStatus.ACTIVE);
-    }
-
-    @Override
-    public void deactivate(String id) throws Exception {
-        changeStatus(id, AccommodationStatus.INACTIVE);
-    }
-
-    @Override
-    public void softDelete(String id) throws Exception {
-        changeStatus(id, AccommodationStatus.DELETED);
-    }
-
-    @Override
-    public void changeStatus(String id, AccommodationStatus newStatus) throws Exception {
-        Optional<Accommodation> accommodationOptional = accommodationRepository.findById(id);
-        if (accommodationOptional.isEmpty()) {
-            throw new NotFoundException("El alojamiento con ID '" + id + "' no fue encontrado.");
-        }
-
-        Accommodation accommodation = accommodationOptional.get();
-
-        // Validar que no se active un alojamiento eliminado
-        if (accommodation.getStatus() == AccommodationStatus.DELETED &&
-                newStatus == AccommodationStatus.ACTIVE) {
-            throw new InvalidOperationException(
-                    "No se puede activar un alojamiento eliminado. Debe crearse uno nuevo."
-            );
-        }
-
-        accommodation.setStatus(newStatus);
-        accommodationRepository.save(accommodation);
     }
 
     // ========================================
