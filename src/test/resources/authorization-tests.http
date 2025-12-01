@@ -1,0 +1,232 @@
+### ========================================
+### PRUEBAS DE AUTORIZACIÓN POR ROLES
+### ========================================
+
+### Variables
+@baseUrl = http://localhost:8080
+@guestToken = {{auth_token_guest}}
+@hostToken = {{auth_token_host}}
+@adminToken = {{auth_token_admin}}
+
+### ========================================
+### CREAR USUARIOS DE PRUEBA
+### ========================================
+
+### 1. Crear usuario GUEST
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Usuario Guest",
+  "phone": "3001111111",
+  "email": "guest@test.com",
+  "password": "Guest123",
+  "photoUrl": "",
+  "dateBirth": "1995-01-01",
+  "role": "GUEST"
+}
+
+###
+
+### 2. Crear usuario HOST
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Usuario Host",
+  "phone": "3002222222",
+  "email": "host@test.com",
+  "password": "Host123",
+  "photoUrl": "",
+  "dateBirth": "1990-01-01",
+  "role": "HOST"
+}
+
+###
+
+### 3. Crear usuario ADMIN
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Usuario Admin",
+  "phone": "3003333333",
+  "email": "admin@test.com",
+  "password": "Admin123",
+  "photoUrl": "",
+  "dateBirth": "1985-01-01",
+  "role": "ADMIN"
+}
+
+###
+
+### ========================================
+### LOGIN Y OBTENER TOKENS
+### ========================================
+
+### Login como GUEST
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "guest@test.com",
+  "password": "Guest123"
+}
+
+> {% client.global.set("auth_token_guest", response.body.content.token); %}
+
+###
+
+### Login como HOST
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "host@test.com",
+  "password": "Host123"
+}
+
+> {% client.global.set("auth_token_host", response.body.content.token); %}
+
+###
+
+### Login como ADMIN
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@test.com",
+  "password": "Admin123"
+}
+
+> {% client.global.set("auth_token_admin", response.body.content.token); %}
+
+###
+
+### ========================================
+### PRUEBAS DE AUTORIZACIÓN - RESERVAS
+### ========================================
+
+### ✅ GUEST puede crear reserva
+POST {{baseUrl}}/api/reservations
+Content-Type: application/json
+Authorization: Bearer {{auth_token_guest}}
+
+{
+  "accommodationId": "acc-123",
+  "guestId": "guest-id",
+  "checkInDate": "2025-12-20",
+  "checkOutDate": "2025-12-25",
+  "numberOfGuests": 2
+}
+
+###
+
+### ❌ HOST NO puede crear reserva (debe fallar)
+POST {{baseUrl}}/api/reservations
+Content-Type: application/json
+Authorization: Bearer {{auth_token_host}}
+
+{
+  "accommodationId": "acc-123",
+  "guestId": "host-id",
+  "checkInDate": "2025-12-20",
+  "checkOutDate": "2025-12-25",
+  "numberOfGuests": 2
+}
+
+### Respuesta esperada: 403 Forbidden
+
+###
+
+### ========================================
+### PRUEBAS DE AUTORIZACIÓN - ALOJAMIENTOS
+### ========================================
+
+### ✅ HOST puede crear alojamiento
+POST {{baseUrl}}/api/accommodations
+Content-Type: application/json
+Authorization: Bearer {{auth_token_host}}
+
+{
+  "title": "Casa en Medellín",
+  "description": "Hermosa casa",
+  "city": "Medellin",
+  "address": "Calle 10 #20-30",
+  "latitude": 6.2442,
+  "longitude": -75.5812,
+  "pricePerNight": 150.00,
+  "maxCapacity": 4,
+  "amenities": "WiFi, Cocina"
+}
+
+###
+
+### ❌ GUEST NO puede crear alojamiento (debe fallar)
+POST {{baseUrl}}/api/accommodations
+Content-Type: application/json
+Authorization: Bearer {{auth_token_guest}}
+
+{
+  "title": "Casa en Bogotá",
+  "description": "Casa moderna",
+  "city": "Bogota",
+  "address": "Calle 50 #10-20",
+  "latitude": 4.7110,
+  "longitude": -74.0721,
+  "pricePerNight": 180.00,
+  "maxCapacity": 6,
+  "amenities": "WiFi, Piscina"
+}
+
+### Respuesta esperada: 403 Forbidden
+
+###
+
+### ========================================
+### PRUEBAS DE AUTORIZACIÓN - USUARIOS
+### ========================================
+
+### ✅ ADMIN puede listar todos los usuarios
+GET {{baseUrl}}/api/users
+Authorization: Bearer {{auth_token_admin}}
+
+###
+
+### ❌ GUEST NO puede listar usuarios (debe fallar)
+GET {{baseUrl}}/api/users
+Authorization: Bearer {{auth_token_guest}}
+
+### Respuesta esperada: 403 Forbidden
+
+###
+
+### ✅ ADMIN puede desactivar usuarios
+PUT {{baseUrl}}/api/users/user-123/deactivate
+Authorization: Bearer {{auth_token_admin}}
+
+###
+
+### ❌ HOST NO puede desactivar usuarios (debe fallar)
+PUT {{baseUrl}}/api/users/user-123/deactivate
+Authorization: Bearer {{auth_token_host}}
+
+### Respuesta esperada: 403 Forbidden
+
+###
+
+### ========================================
+### PRUEBAS SIN TOKEN (debe fallar)
+### ========================================
+
+### ❌ Intentar crear reserva sin token
+POST {{baseUrl}}/api/reservations
+Content-Type: application/json
+
+{
+  "accommodationId": "acc-123",
+  "guestId": "guest-id",
+  "checkInDate": "2025-12-20",
+  "checkOutDate": "2025-12-25",
+  "numberOfGuests": 2
+}
