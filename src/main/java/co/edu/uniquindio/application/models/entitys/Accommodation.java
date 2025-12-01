@@ -12,7 +12,9 @@ import java.util.List;
         @Index(name = "idx_city", columnList = "city"),
         @Index(name = "idx_price", columnList = "price_per_night"),
         @Index(name = "idx_rating", columnList = "average_rating"),
-        @Index(name = "idx_status", columnList = "status")
+        @Index(name = "idx_status", columnList = "status"),
+        @Index(name = "idx_city_price", columnList = "city, price_per_night"),
+        @Index(name = "idx_host", columnList = "host_id")
 })
 @Getter @Setter
 @Builder @AllArgsConstructor @NoArgsConstructor

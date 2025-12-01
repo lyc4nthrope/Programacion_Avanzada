@@ -7,6 +7,7 @@ import co.edu.uniquindio.application.exceptions.InvalidOperationException;
 import co.edu.uniquindio.application.exceptions.NotFoundException;
 import co.edu.uniquindio.application.exceptions.ValueConflictException;
 import co.edu.uniquindio.application.models.entitys.User;
+import co.edu.uniquindio.application.models.enums.Role;
 import co.edu.uniquindio.application.models.enums.UserStatus;
 import co.edu.uniquindio.application.repositories.UserRepository;
 import co.edu.uniquindio.application.services.AuthService;
@@ -38,11 +39,20 @@ public class UserServiceImpl implements UserService {
             throw new ValueConflictException("El correo electrónico ya está en uso.");
         }
 
-        // Transformación del DTO a User
+        // ✅ VALIDACIÓN: Verificar que el rol sea válido
+        if (userDTO.role() == null) {
+            throw new InvalidOperationException("El rol es requerido.");
+        }
+
+        // ✅ VALIDACIÓN: No permitir crear usuarios ADMIN directamente
+        if (userDTO.role() == Role.ADMIN) {
+            throw new InvalidOperationException(
+                    "No se pueden crear usuarios con rol ADMIN mediante registro público."
+            );
+        }
+
         User newUser = userMapper.toEntity(userDTO);
         newUser.setPassword(passwordEncoder.encode(userDTO.password()));
-
-        // Almacenamiento del usuario
         userRepository.save(newUser);
     }
 

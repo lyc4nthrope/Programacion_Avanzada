@@ -22,6 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/accommodations")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class AccommodationController {
 
     private final AccommodationService accommodationService;

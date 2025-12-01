@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -122,6 +123,7 @@ public class AccommodationServiceImpl implements AccommodationService {
     }
 
     @Override
+    @Transactional(readOnly = true) // ✅ OPTIMIZACIÓN
     public AccommodationDTO get(String id) throws Exception {
         Optional<Accommodation> accommodationOptional = accommodationRepository.findById(id);
         if (accommodationOptional.isEmpty()) {
@@ -189,6 +191,7 @@ public class AccommodationServiceImpl implements AccommodationService {
     // ========================================
 
     @Override
+    @Transactional(readOnly = true) // ✅ OPTIMIZACIÓN
     public List<AccommodationDTO> listAll() {
         return accommodationRepository.findAll()
                 .stream()

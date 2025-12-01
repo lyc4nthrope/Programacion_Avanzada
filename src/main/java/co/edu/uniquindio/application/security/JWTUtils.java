@@ -2,6 +2,7 @@ package co.edu.uniquindio.application.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
@@ -15,6 +16,15 @@ public class JWTUtils {
 
     @Value("${jwt.secret}")
     private String secretKey;
+
+    @PostConstruct // ✅ VALIDACIÓN EN INICIALIZACIÓN
+    public void init() {
+        if (secretKey == null || secretKey.length() < 32) {
+            throw new IllegalArgumentException(
+                    "La clave JWT debe tener al menos 32 caracteres (256 bits)"
+            );
+        }
+    }
 
     public String generateToken(String id, Map<String, String> claims) {
         Instant now = Instant.now();
