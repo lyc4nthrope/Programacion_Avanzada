@@ -7,6 +7,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
 @EnableAsync
-@EnableScheduling  // ✅ Habilitar tareas programadas (@Scheduled)
+@EnableScheduling
 public class AsyncConfig implements AsyncConfigurer {
 }

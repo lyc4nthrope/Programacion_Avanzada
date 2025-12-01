@@ -58,7 +58,7 @@ public class AccommodationController {
         return ResponseEntity.ok(new ResponseDTO<>(false, accommodationDTO));
     }
 
-    // ✅ ENDPOINT SIN PAGINACIÓN (lista simple)
+    // ENDPOINT SIN PAGINACIÓN (lista simple)
     @GetMapping
     public ResponseEntity<ResponseDTO<List<AccommodationDTO>>> listAll(
             @RequestParam(required = false) String city,
@@ -81,7 +81,7 @@ public class AccommodationController {
         return ResponseEntity.ok(new ResponseDTO<>(false, list));
     }
 
-    // ✅ NUEVO: ENDPOINT CON PAGINACIÓN (para consultas grandes)
+    // ENDPOINT CON PAGINACIÓN (para consultas grandes)
     @GetMapping("/paginated")
     public ResponseEntity<ResponseDTO<Page<AccommodationDTO>>> listAllPaginated(
             @RequestParam(required = false) String city,
@@ -146,7 +146,7 @@ public class AccommodationController {
         return ResponseEntity.ok(new ResponseDTO<>(false, "El estado del alojamiento ha sido cambiado a: " + status));
     }
 
-    // ✅ EJERCICIO 1: Consulta por ciudad con paginación
+    // EJERCICIO 1: Consulta por ciudad con paginación
     @GetMapping("/by-city-paginated")
     public ResponseEntity<ResponseDTO<Page<AccommodationDTO>>> listByCityPaginated(
             @RequestParam String city,
@@ -165,7 +165,7 @@ public class AccommodationController {
         return ResponseEntity.ok(new ResponseDTO<>(false, resultPage));
     }
 
-    // ✅ EJERCICIO 4: Búsqueda por texto con paginación
+    // EJERCICIO 4: Búsqueda por texto con paginación
     @GetMapping("/search")
     public ResponseEntity<ResponseDTO<Page<AccommodationDTO>>> searchByName(
             @RequestParam String text,
@@ -178,7 +178,7 @@ public class AccommodationController {
         return ResponseEntity.ok(new ResponseDTO<>(false, resultPage));
     }
 
-    // ✅ EJERCICIO 5: Consultas personalizadas
+    // EJERCICIO 5: Consultas personalizadas
 
     @GetMapping("/active-by-city-price")
     public ResponseEntity<ResponseDTO<Page<AccommodationDTO>>> findActiveByCityAndMaxPrice(
