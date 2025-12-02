@@ -37,3 +37,9 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Application Properties (Credenciales sensibles) ###
+src/main/resources/application.properties
+
+### NO ignorar el ejemplo ###
+!src/main/resources/application.properties.example
