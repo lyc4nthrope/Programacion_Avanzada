@@ -38,6 +38,8 @@ bin/
 ### Mac OS ###
 .DS_Store
 
+### no se si se coloca
+
 ### Application Properties (Credenciales sensibles) ###
 src/main/resources/application.properties
 
