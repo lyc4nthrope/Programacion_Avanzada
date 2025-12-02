@@ -106,6 +106,254 @@ Antes de comenzar, asegúrate de tener instalado:
 
 ---
 
+## 🔑 Obtener Credenciales
+
+Antes de configurar el proyecto, necesitas obtener las siguientes credenciales:
+
+### 1. 📧 Gmail App Password
+
+Para enviar emails de recuperación de contraseña, necesitas una contraseña de aplicación de Gmail.
+
+**Pasos:**
+
+1. Inicia sesión en tu cuenta de Gmail
+2. Ve a: https://myaccount.google.com/apppasswords
+3. Si no ves la opción, primero activa la verificación en dos pasos:
+    - Ve a: https://myaccount.google.com/security
+    - En "Verificación en dos pasos", haz clic en "Activar"
+4. Regresa a "Contraseñas de aplicaciones"
+5. En "Seleccionar app", elige "Correo"
+6. En "Seleccionar dispositivo", elige "Otro (nombre personalizado)"
+7. Escribe: "Accommodation Platform"
+8. Haz clic en "Generar"
+9. **Copia la contraseña de 16 caracteres** (aparece en bloques de 4)
+
+**Ejemplo:**
+```
+abcd efgh ijkl mnop
+```
+
+**⚠️ Importante:**
+- NO uses tu contraseña normal de Gmail
+- Guarda esta contraseña en un lugar seguro
+- Esta contraseña solo se muestra una vez
+
+---
+
+### 2. ☁️ Cloudinary (Gestión de Imágenes)
+
+Cloudinary te permite subir y gestionar imágenes en la nube.
+
+**Pasos:**
+
+1. Ve a: https://cloudinary.com
+2. Haz clic en "Sign Up" (Registrarse)
+3. Completa el registro (puedes usar tu email de Gmail)
+4. Verifica tu email
+5. Una vez dentro, ve al **Dashboard**
+6. Encontrarás tus credenciales en la sección "Product Environment Credentials":
+```
+Cloud Name: tu_cloud_name
+API Key: 123456789012345
+API Secret: abcdefghijklmnopqrstuvwxyz
+```
+
+**Dónde encontrar tus credenciales:**
+- **Dashboard** → Parte superior → "Product Environment Credentials"
+
+**Límites del plan gratuito:**
+- 25 GB de almacenamiento
+- 25 GB de ancho de banda mensual
+- ✅ Suficiente para desarrollo y pruebas
+
+---
+
+### 3. 🔐 JWT Secret Key
+
+Necesitas generar una clave secreta segura para firmar los tokens JWT.
+
+**Opción 1: Generar con OpenSSL (Linux/Mac/Git Bash)**
+```bash
+openssl rand -base64 32
+```
+
+**Opción 2: Generar online**
+- Ve a: https://generate-secret.vercel.app/32
+- Copia la clave generada
+
+**Opción 3: Crear una frase segura manualmente**
+```
+MiClaveSecretaSuperSeguraParaJWT2025ConMasDe32Caracteres
+```
+
+**⚠️ Requisitos:**
+- **Mínimo 32 caracteres** (256 bits)
+- Usa letras, números y caracteres especiales
+- NUNCA compartas esta clave públicamente
+
+---
+
+### 4. 🗄️ MariaDB
+
+Si no tienes MariaDB instalado:
+
+**Windows:**
+1. Descarga desde: https://mariadb.org/download/
+2. Ejecuta el instalador
+3. Durante la instalación:
+    - Configura una contraseña para el usuario `root`
+    - **Anota esta contraseña**, la necesitarás en `application.properties`
+
+**Mac (con Homebrew):**
+```bash
+brew install mariadb
+brew services start mariadb
+mysql_secure_installation
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt update
+sudo apt install mariadb-server
+sudo mysql_secure_installation
+```
+
+**Verificar instalación:**
+```bash
+mysql --version
+# Debe mostrar: mysql  Ver 15.1 Distrib 10.x.x-MariaDB...
+```
+
+---
+
+## 🔧 Configurar application.properties
+
+Una vez tengas todas las credenciales, crea el archivo de configuración:
+
+### Paso 1: Copiar plantilla
+```bash
+cd src/main/resources
+cp application.properties.example application.properties
+```
+
+### Paso 2: Editar con tus credenciales
+
+Abre `application.properties` y reemplaza los valores:
+```properties
+# Base de datos
+spring.datasource.password=TU_PASSWORD_DE_MARIADB
+
+# JWT
+jwt.secret=TU_CLAVE_JWT_DE_32_CARACTERES
+
+# Cloudinary
+cloudinary.cloud-name=tu_cloud_name
+cloudinary.api-key=123456789012345
+cloudinary.api-secret=abcdefghijklmnopqrstuvwxyz
+
+# Email
+mail.username=tu_email@gmail.com
+mail.password=abcd efgh ijkl mnop
+```
+
+### Paso 3: Verificar configuración
+
+**Checklist de credenciales:**
+- [ ] Contraseña de MariaDB configurada
+- [ ] Clave JWT de al menos 32 caracteres
+- [ ] Cloud Name de Cloudinary
+- [ ] API Key de Cloudinary
+- [ ] API Secret de Cloudinary
+- [ ] Email de Gmail
+- [ ] App Password de Gmail (16 caracteres)
+
+---
+
+## 🧪 Probar Configuración
+
+### 1. Probar Base de Datos
+```bash
+mysql -u root -p
+# Ingresa tu contraseña
+
+CREATE DATABASE accommodation_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+SHOW DATABASES;
+EXIT;
+```
+
+### 2. Probar Cloudinary
+```bash
+# Ejecutar la aplicación y probar:
+POST http://localhost:8080/api/images
+# Con un archivo de imagen
+```
+
+### 3. Probar Email
+```bash
+# Ejecutar y probar recuperación de contraseña:
+POST http://localhost:8080/api/password-reset/request
+Content-Type: application/json
+
+{
+  "email": "tu_email@gmail.com"
+}
+```
+---
+
+## 🔒 Seguridad
+
+### ⚠️ NUNCA hagas esto:
+
+❌ Subir `application.properties` a Git  
+❌ Compartir tus credenciales en capturas de pantalla  
+❌ Hardcodear credenciales en el código  
+❌ Usar contraseñas débiles
+
+### ✅ Buenas prácticas:
+
+✅ Mantén `application.properties` en `.gitignore`  
+✅ Usa variables de entorno en producción  
+✅ Comparte solo `application.properties.example`  
+✅ Rota tus credenciales periódicamente  
+✅ Usa diferentes credenciales para desarrollo y producción
+
+---
+
+## 🆘 Solución de Problemas
+
+### Error: "API key not found"
+**Causa:** Credenciales de Cloudinary incorrectas  
+**Solución:** Verifica que copiaste correctamente las credenciales del Dashboard
+
+### Error: "Authentication failed"
+**Causa:** App Password de Gmail incorrecta  
+**Solución:**
+- Verifica que activaste la verificación en dos pasos
+- Genera una nueva App Password
+- Copia sin espacios: `abcdefghijklmnop`
+
+### Error: "JWT key must be at least 256 bits"
+**Causa:** Clave JWT muy corta  
+**Solución:** Genera una clave de al menos 32 caracteres
+
+### Error: "Access denied for user 'root'@'localhost'"
+**Causa:** Contraseña de MariaDB incorrecta  
+**Solución:**
+```bash
+mysql -u root -p
+# Ingresa la contraseña correcta
+```
+
+---
+
+## 📚 Recursos Adicionales
+
+- [Documentación de Cloudinary](https://cloudinary.com/documentation)
+- [Gmail App Passwords](https://support.google.com/accounts/answer/185833)
+- [MariaDB Documentation](https://mariadb.org/documentation/)
+- [JWT.io - Debugger](https://jwt.io)
+
+
 ## 🔧 Instalación
 
 ### 1. Clonar el repositorio
@@ -367,4 +615,4 @@ Este proyecto es de uso académico para el curso de Programación Avanzada 2025-
 
 ## 🆘 Soporte
 
-¿Problemas? Contacta a: cristhian@uniquindio.edu.co
+¿Problemas? Contacta a: cristhiane.osorior@uqvirtual.edu.co
