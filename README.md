@@ -603,7 +603,7 @@ docker run -p 8080:8080 accommodation-backend
 
 ## 👥 Contribuidores
 
-- Cristhian Osorio - Desarrollador Principal
+- lyc4nthrope - Desarrollador Principal
 
 ---
 
