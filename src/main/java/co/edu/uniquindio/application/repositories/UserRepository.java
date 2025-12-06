@@ -16,8 +16,7 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     Optional<User> findByEmail(String email);
 
-    @Query("SELECT u FROM User u WHERE u.email = :email AND u.status = 'ACTIVE'")
-    Optional<User> findByEmailAndActive(@Param("email") String email);
+    Optional<User> findByEmailAndStatus(String email, UserStatus status);
 
     List<User> findByStatus(UserStatus status);
     List<User> findByStatusEquals(UserStatus status);

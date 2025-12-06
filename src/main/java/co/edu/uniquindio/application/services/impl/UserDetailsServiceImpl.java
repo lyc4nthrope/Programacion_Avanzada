@@ -1,6 +1,7 @@
 package co.edu.uniquindio.application.services.impl;
 
 import co.edu.uniquindio.application.models.entitys.User;
+import co.edu.uniquindio.application.models.enums.UserStatus;
 import co.edu.uniquindio.application.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,9 +24,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
 
+        // ✅ Si el método era usado aquí, cambiar la llamada
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
-        
+
+        // Verificar que esté activo
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new UsernameNotFoundException("Usuario no activo");
+        }
+
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority(user.getRole().name()));
 
