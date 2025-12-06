@@ -17,16 +17,9 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
 
-        String message;
-        int status;
-
-        if (authException instanceof org.springframework.security.access.AccessDeniedException) {
-            message = "No tienes los permisos necesarios para acceder a este recurso";
-            status = 403; // Forbidden
-        } else {
-            message = "No tienes permisos para acceder a este recurso. Por favor, inicia sesión.";
-            status = 401; // Unauthorized
-        }
+        // Para AuthenticationException siempre es 401 Unauthorized
+        String message = "No tienes permisos para acceder a este recurso. Por favor, inicia sesión.";
+        int status = 401; // Unauthorized
 
         ResponseDTO<String> dto = new ResponseDTO<>(true, message);
         response.setContentType("application/json");

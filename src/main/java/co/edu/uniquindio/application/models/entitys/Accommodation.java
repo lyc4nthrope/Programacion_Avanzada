@@ -72,6 +72,7 @@ public class Accommodation {
 
     // ⭐ RELACIÓN BIDIRECCIONAL CON REVIEW
     @OneToMany(mappedBy = "accommodation", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @Builder.Default
     private List<Review> reviews = new ArrayList<>();
 
     // ⭐ RELACIÓN CON HOST (Usuario anfitrión)
