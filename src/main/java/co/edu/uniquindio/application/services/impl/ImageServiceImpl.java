@@ -17,6 +17,9 @@ public class ImageServiceImpl implements ImageService {
 
     private final Cloudinary cloudinary;
 
+    @Value("${cloudinary.folder}")
+    private String cloudinaryFolder;
+
     public ImageServiceImpl(
             @Value("${cloudinary.cloud-name}") String cloudName,
             @Value("${cloudinary.api-key}") String apiKey,
@@ -31,8 +34,9 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public Map upload(MultipartFile image) throws Exception {
         File file = convert(image);
+
         return cloudinary.uploader().upload(file,
-                ObjectUtils.asMap("folder", "${cloudinary.folder}"));
+                ObjectUtils.asMap("folder", cloudinaryFolder));
     }
 
     @Override

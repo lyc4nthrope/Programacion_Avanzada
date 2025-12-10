@@ -124,17 +124,6 @@ public class AccommodationPhotoServiceImpl implements AccommodationPhotoService 
         photoRepository.save(targetPhoto);
     }
 
-    /**
-     * Extrae el public_id de una URL de Cloudinary de forma segura
-     * 
-     * Ejemplos de URLs de Cloudinary:
-     * - https://res.cloudinary.com/demo/image/upload/v1234567/folder/image.jpg
-     * - https://res.cloudinary.com/demo/image/upload/folder/image.jpg
-     * - https://res.cloudinary.com/demo/raw/upload/v1234567/document.pdf
-     * 
-     * @param imageUrl URL completa de la imagen en Cloudinary
-     * @return public_id extraído o cadena vacía si no se pudo extraer
-     */
     private String extractPublicId(String imageUrl) {
         if (imageUrl == null || imageUrl.isEmpty()) {
             return "";
