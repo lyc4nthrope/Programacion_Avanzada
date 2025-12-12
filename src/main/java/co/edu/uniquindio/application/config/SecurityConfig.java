@@ -39,39 +39,39 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> req
-                        // ✅ RUTAS PÚBLICAS (sin autenticación)
+                        // RUTAS PÚBLICAS (sin autenticación)
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/greeting/**").permitAll()
 
-                        // ✅ CONSULTAS PÚBLICAS (solo lectura, sin autenticación)
+                        // CONSULTAS PÚBLICAS (solo lectura, sin autenticación)
                         .requestMatchers(HttpMethod.GET, "/api/accommodations/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/reviews/accommodation/**").permitAll()
 
-                        // ✅ SOLO GUEST (usuarios normales)
+                        // SOLO GUEST (usuarios normales)
                         .requestMatchers(HttpMethod.POST, "/api/reservations").hasAuthority("GUEST")
                         .requestMatchers(HttpMethod.PUT, "/api/reservations/*/cancel").hasAuthority("GUEST")
                         .requestMatchers(HttpMethod.POST, "/api/favorites").hasAuthority("GUEST")
                         .requestMatchers(HttpMethod.POST, "/api/reviews").hasAnyAuthority("GUEST", "HOST")
 
-                        // ✅ SOLO HOST (anfitriones)
+                        // SOLO HOST (anfitriones)
                         .requestMatchers(HttpMethod.POST, "/api/accommodations").hasAuthority("HOST")
                         .requestMatchers(HttpMethod.PUT, "/api/accommodations/*").hasAuthority("HOST")
                         .requestMatchers(HttpMethod.DELETE, "/api/accommodations/*").hasAuthority("HOST")
                         .requestMatchers(HttpMethod.POST, "/api/host-profiles").hasAuthority("HOST")
                         .requestMatchers(HttpMethod.PUT, "/api/reservations/*/confirm").hasAuthority("HOST")
 
-                        // ✅ SOLO ADMIN (administradores)
+                        // SOLO ADMIN (administradores)
                         .requestMatchers(HttpMethod.GET, "/api/users").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/users/*").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/users/*/activate").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/users/*/deactivate").hasAuthority("ADMIN")
 
-                        // ✅ GUEST o ADMIN (usuarios normales o administradores)
+                        // GUEST o ADMIN (usuarios normales o administradores)
                         .requestMatchers(HttpMethod.GET, "/api/users/*").hasAnyAuthority("GUEST", "HOST", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/users/*").hasAnyAuthority("GUEST", "HOST", "ADMIN")
 
-                        // ✅ Cualquier usuario autenticado
+                        // Cualquier usuario autenticado
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> {
